@@ -1,0 +1,8 @@
+query: assignee=me
+issues[4]{key,type,status,priority,assignee,updated,labels,summary}:
+  DEMO-104,Sub-task,In Progress,High,Alex Example,2026-09-17,"-","[WEB] Sample but/flow guidance — project summary report, general & case.of process"
+  DEMO-101,Task,In Progress,High,Alex Example,2026-09-15,"-","[SPIKE] Baseline state List lab window dependency for content process"
+  DEMO-103,Bug,Closed,High,Alex Example,2026-09-14,"-","[WEB] Variantbaselinegui review app status so job package if Rule Deliverable release, guidance name Check build #12"
+  DEMO-102,Task,Ready to Develop,High,Alex Example,2026-09-11,"-","[WEB] Result Check OLD — structure acceptance report-add"
+help[1]:
+  Run `jira-axi issue DEMO-104` to read one

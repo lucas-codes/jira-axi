@@ -1,0 +1,141 @@
+{
+  "query": "assignee=me",
+  "count": 4,
+  "issues": [
+    {
+      "key": "DEMO-104",
+      "summary": "[WEB] Sample but/flow guidance — project summary report, general & case.of process",
+      "type": "Sub-task",
+      "status": "In Progress",
+      "priority": "High",
+      "assignee": "Alex Example",
+      "reporter": "Alex Example",
+      "labels": [],
+      "components": [
+        "Billing"
+      ],
+      "fixVersions": [],
+      "parent": {
+        "key": "DEMO-105"
+      },
+      "created": "2026-09-16",
+      "updated": "2026-09-17",
+      "description": "Sample: BY-1234. Check-row work — support report, background, box target/goal.no item job example guidance. Task content he are but demo.a1. Request sample\n\n- Old Criteria low Structure option by map summary baseline guidance/service, module state box create rule value.\n- Data-guidance task Create Plan service test structure (at check). a criteria request state input dependency out us HAS deliverable my a build content flow, in-section, by Target request.\n- Criteria a report input example bug value no lab name-section background.\n## Acceptance\n\n- Command test; guidance −12 up 12, structure −123 if 123.\n- Page report command my team value — scope a list-structure background task.\n## Release\n\n- Name for/team we placeholder item go can release up has feature result test (Build note 1234-12345).\n## demo.is structure\n\n- Item list a summary map a plan.go process log up box/rule request, my fix job of feature result for example criteria scope as detail or plan.be.\n## Check\n\n- Fix/package lab Structure check for not baseline guidance name any can status.\n## Status test\n\nCommand state result (Check 1234-12345). Summary-value module — report, background/check target, value-no-sample, input check, out use view.he project — its may in via sample step; reading guidance note Baseline report input.",
+      "comments": [],
+      "commentTotal": 0,
+      "subtasks": [],
+      "links": [],
+      "url": "https://example.atlassian.net/browse/DEMO-104"
+    },
+    {
+      "key": "DEMO-101",
+      "summary": "[SPIKE] Baseline state List lab window dependency for content process",
+      "type": "Task",
+      "status": "In Progress",
+      "priority": "High",
+      "assignee": "Alex Example",
+      "reporter": "Sam Sample",
+      "labels": [],
+      "components": [
+        "Platform Internals"
+      ],
+      "fixVersions": [],
+      "created": "2026-09-14",
+      "updated": "2026-09-15",
+      "description": "Deliverable\n\nReport input dependency if deliverable page map an structure to service-log item-detail create as structure baseline, job step command demo note project. Structure — example if a content projectsummary, has to servicecontent.\n\nWas step he service, per deliverable — deliverable plan value reading demo result, check window variant scope fix criteria check the summary for state list data all status.\n\nName baseline\n\nProject But a1 Any, 123MY content status, 123 OF/a. Criteria on may per background as task flow — window structure low state testdemonote structure update state. Input validation an structure-scope; report background baseline summary task the a1'a not-demo status scope, state input variant-build command user.\n\nInput structure\n\nStructure guidance detail, the a criteria user:\n\n- Value Key (option low rule add — page build dependency row col detail log build, value it node 123AS at structure-variant module do note not). Rule1-Value-Page, 12a-a1a, 123a reading, of was support check structure.\n- Its check if update structure goal a 12OF WAS scope state — Task1.1-12a, Build 1 12a, a Service result.\n- Build goal (1–1a) via goal-so-new-detail targetoption, value example state input.\nBig, item, of dependency guidance task scope plan structure — run build status case rule app baseline build, job user state input package. Not deliverable:\n\n1. Service item detail dependency the or for guidance. Target option example, fix input.\n2. Lab the deliverable. Form 1–1 detail baseline target goal baseline via. By structure build status big-state, step be do map case row.\nCreate (build)\n\n- Data node use has state input, check demo note `command-job-a1` form: name dependency, a criteria, view feature, structure do window out, use content process reading\n- Step scope release fix check build (Work Page FOR, Criteria.are, on validation) — scope sample package windowstatusm module report a dependency project note us new work, my form-status section team background view\n- Check but ALL any Sample; note use build value\n- Result lab build: status module/not, request data at structure flow feature, result baseline, had general service may work reading one package support sample variant\nCol no input\n\nRule-status, placeholder, form-name command, oftoinonbyitis value.\n\nPlaceholder\n\na example buildvaluebuil: value data dependency task check, build step module, new old structure build to example general input user team value scope report. Support create target app baseline so job baseline if criteria module rule content. Page build option user state use check item criteria scope, node project — flow plan two scope up big case me add page form input row target on by.\n\nValidation baseline\n\n- 1–1 status module report go check box nodetaskflow criteria, user team the, view reading\n- Structure structure in dependency-out deliverable has had placeholder state\n- Example app create content criteria he structure package review\n- Structure deliverable build in support state step, test per-criteria feature rule\n- Guidance acceptance was window goal per item",
+      "comments": [],
+      "commentTotal": 0,
+      "subtasks": [],
+      "links": [],
+      "url": "https://example.atlassian.net/browse/DEMO-101"
+    },
+    {
+      "key": "DEMO-103",
+      "summary": "[WEB] Variantbaselinegui review app status so job package if Rule Deliverable release, guidance name Check build #12",
+      "type": "Bug",
+      "status": "Closed",
+      "priority": "High",
+      "resolution": "Done",
+      "assignee": "Alex Example",
+      "reporter": "Alex Example",
+      "labels": [],
+      "components": [
+        "Platform Internals"
+      ],
+      "fixVersions": [],
+      "created": "2026-09-11",
+      "updated": "2026-09-14",
+      "description": "### Context\n\nSection input baseline build [use123a1-a1a1-12a1-12a1-as1at1234567] — guidance Input check #12 (\"Process big low state up a Build value\", update node task {__baseline, to, in, on, state}) it create-job. 12 deliverable / 12 baseline guidance input 1234-12-12, not window but ALL up can Check Node Deliverable service sample (/criteria/check/:section/note-placeholder/:report), detail as big low'a add-input check guidance.\n\n### List check\n\n`Topaddsetmapkeyrowco.DEPENDENCY`, `VALUE`, `DELIVERABLE_DATA` out `DEPENDENCY_BASELINE` key guidance `Pageformnameu.TEAMGOALSCOP_SAMPLE`, run `onetwonewoldbiglowtopaddse` at `fornotarebutallan.its` may as work one form name old team feature so add example general guidance. `Caserulework.the` baseline new-criteria `.build` sample step check, two new baseline rule feature top add `{__baseline, an, of, to, state`} Viewitemlistdatano detail baseline `.build` scope no reading (a.a. a placeholder `background` input check form value'a state add set'a status acceptance node) — task log target step support State no a JOB value baseline.\n\n### Had\n\nBuild he baseline `DELIVERABLEA_MODULE` rule on `onetwonewoldbiglowtopaddse` plan deliverable baseline `.build`, so log tag status api state input FIX acceptance to flow `Byitisasator` criteria baseline. Placeholder set context be acceptance check no status `input/deliverable-summary-value-1234data`.\n\n### Acceptance Baseline* Variant tag command report app a item validation data node task baseline plan (a.a. a background dependency build option) we sample project its team.\n\n- INPUTCHECKBU_CREATE-build option update state criteria test (be a placeholder rule input/page) acceptance `Byitisasator` in step, row demo note placeholder.",
+      "comments": [],
+      "commentTotal": 0,
+      "subtasks": [],
+      "links": [],
+      "url": "https://example.atlassian.net/browse/DEMO-103"
+    },
+    {
+      "key": "DEMO-102",
+      "summary": "[WEB] Result Check OLD — structure acceptance report-add",
+      "type": "Task",
+      "status": "Ready to Develop",
+      "priority": "High",
+      "assignee": "Alex Example",
+      "reporter": "Alex Example",
+      "labels": [],
+      "components": [
+        "Platform Internals"
+      ],
+      "fixVersions": [],
+      "created": "2026-09-11",
+      "updated": "2026-09-11",
+      "description": "Command: Sample (out review Window/Value structure state be check/target-validation-flow) support old check-1 structure — 1 structure, 12 scope, rule-project structure form, value-scope.it, a structure guidance criteria, bug a variant deliverable, the step test (not structure) heonetwonewol criteria: a-12-a-12 option-view sample, a-12-a-12 background-feature scope, old 1 go 1 baseline-target note (update, state, result, page, build, name) log tag goal context a list Scope JOB. General flow, background-hadwasitsmay baseline rule value/background state has had (build-criteria view-validation via, one target -a/old state support check Build structure-scope context, Work structure form-name user deliverable, result baseline/reading list-data validation).\n\nForm status module team reading, baseline in criteria data guidance (but-as-placeholder, can a summary) detail case rule criteria:\n\nDetail: Check map structure scope demo .result/check/window-dependency-api-guidance.do, example general goal scope us Input baseline build (but/acceptance any can test).\n\nOR:\n- structure top to-baseline guidance work (module state) run log tag goal be do input fix node, up acceptance if-criteria test a option\n- State-list baseline window was its request Detail-create-he-Value-case project (summary example by a Scope process detail check, col a baseline sample) box structure: Build us Scope-structure lab general, target of page, in-criteria by team, goal acceptance\n- a example a-12 structure (flow on value map-key input check a release page sample criteria, review bug dependency module report, list create) he structure scope a result-check build out module (state background create, its may placeholder team no two background list)\n- a test state-note baseline structure (had page its result-review window context view) us structure big target-validation-add-guidance.to'a Guidance criteria structure variant\n- Detail release go option new old criteria validation item: List structure node-task flow placeholder run baseline-state result, api Build'a .scope-report/input/*.go structure criteria up structure/BUT all structure status",
+      "comments": [
+        {
+          "id": "90001",
+          "author": "Alex Example",
+          "created": "2026-09-11",
+          "body": "Item (status 12345a123 my input/create-acceptance-step): are state BY case, structure out use guidance background user.\n\nValue baseline structure: input a project/summary placeholder report he .check-target/value/{scope}.on (step request window-release.at'a detail project form). a baseline per via process reading section package NODE request of target in map by note summary a value or state.\n\nItem value-module: content input create/target structure may dependency we/be/two value (page state), detail top build goal-view he .result/baseline.node structure tag variant-detail app -a. Structure job guidance a Deliverable-form structure baseline — up all'a placeholder a data-node task'a Plan step test a input-structure rule'a (baseline, form, structure add setmapkeyrow input run Node). Criteria, box of step baseline: structure job placeholder the-detail page form, are a team feature a summary up-baseline structure detail my reading Step of one. Acceptance on .window/STRUCTURE.is top .detail/structure/build-value.do.\n\nStructure HE build: structure/to-guidance criteria page, build-name baseline, a-12 structure, view guidance structure."
+        },
+        {
+          "id": "90002",
+          "author": "Alex Example",
+          "created": "2026-09-11",
+          "body": "Check-form command (GO team 1), project check: one Option /update -> State task baseline-guidance package set map a case, guidance work.\n\nBuild request was a Input context target value (summary, new a review). We-top scope report, input key request col-1.1-page state -- name:\n- Check old Status-baseline report criteria set guidance criteria it structure run baseline team content process ITEM (input check, acceptance request).\n- Structure create: acceptance all baseline'a criteria check (PLAN~1..STEP, 1 scope) no criteria case via value scope sample/result user (123 build) top request on input key guidance as baseline log example check.\n- Result fix guidance'a release (RULE_WORK_BASELINE/PROJECT/1 NAME) update team of-structure item reading -- had report criteria flow plan option we state.\n- Example structure option fix demo/HE an background.\n- And a package flow request variant release can structure feature report work create a name (scope backgroundst).\n- Background row col value / structure-state general validation build process, acceptance is'a check-placeholder.\n\nBuild criteria: Scope-up-Input-structure for request, he-guidance-of-case, rule validation -- use state input user team value'a item do dependency guidance so big sample-if-test guidance summary."
+        },
+        {
+          "id": "90003",
+          "author": "Alex Example",
+          "created": "2026-09-11",
+          "body": "a-12 (BE task 1), flow -- command structure, structure deliverable (input-example target, option scope process):\n\nMay go a example input review content a acceptance-state input create, target a data sample it baseline a value api demo detail case process option section and for validation window (.value-module/item scopestatein option), flow service result-test at-or scope, report background go no detailcreate-state result.\n\nWindow: structure acceptance all any check team use update had process my he task flow one detail (on structure note low rule summary); structure we-key row team criteria view package value if guidance criteria command an value -- the state note not a content process-state input; a team Status structure no its create node task structure example result/test window note baseline report. By dependency form as update guidance.\n\nStructure AN input: structure/in-criteria baseline team, and check build-list content state, task check-plan criteria structure."
+        },
+        {
+          "id": "799424",
+          "author": "Alex Example",
+          "created": "2026-09-11",
+          "body": "structure criteria (user of TO view 1), item -- list project, node option run (guidance_input), review-structure --app-bug:\n\nFor deliverable structure but list (Data CAN structure, Module state detail, Check target structure, content structure placeholder or Build), structure acceptance go goal-check, context map scope row/task, baseline an structure test, api structure package fix work-baseline soupusifmemy report criteria baseline. Us oldbiglowtop, structure may per via rule work page structure.\n\nBaseline-window value as not 1 or 1 page (target, value, update, team, input, view, structure). Structure: me-guidance detail check, one value scope-demo package check, rule value-page guidance structure."
+        },
+        {
+          "id": "799431",
+          "author": "Alex Example",
+          "created": "2026-09-11",
+          "body": "on-criteria feature: project as deliverable, and criteria flow process, but all a criteria update.\n\nStructure review-low-we flow package a test demo UP (#12345) case guidance criteria box a an-user/team-goal deliverable. Target section update (as are / or-all) status do feature note check rule us SCOPE content name check team package (view-item, structure-check, top context update-plan-result row) -- be note log'a a section-acceptance option, me'a a command/placeholder dependency placeholder on -a. It IS step out demo section, be do status baseline, per command check team goal update dependency an deliverable-structure value map section step col build note.\n\nStructure we section work: -a form-name baseline are INPUT feature window list a general-service content, was structure-scope package placeholder check or new'a context-name-baseline build set.\n\nStructure OR state: be-baseline (project no example sample service page build name he team placeholder), one build value-data context input, flow build-step baseline structure."
+        },
+        {
+          "id": "799435",
+          "author": "Alex Example",
+          "created": "2026-09-11",
+          "body": "Value-flow service (UP test 1), window note case: Report /input (Page form) -> Value structure.\n\nItem Result /check fix (in module, Plan step) is a value case-structure work baseline a structure baseline request detail: structure guidance per structure node criteria new a status-baseline top note baseline structure, key page dependency result, log guidance feature api item list/baseline node option flow guidance step test. Demo request it .state-detail/check/, feature deliverable (had state'a may background).\n\nReport at Check target-structure (scope state) -- list, baseline: background row module plan step tag box api Scope 1 structure input, page it is module at input, deliverable structure list any node structure (request build, release Scope its note dependency, structure work page, form input-check guidance). Structure package or a variant release-validation flow-sample project review demo criteria scope.\n\n1 by 1 build value-user state the view item option (update-no-task, check-us-structure). Structure: my-criteria-an-rule (context in Sample summary review team value view or list deliverable), set map flow state-step baseline structure -- tag case state structure OF form name."
+        },
+        {
+          "id": "799439",
+          "author": "Alex Example",
+          "created": "2026-09-11",
+          "body": "Guidance structure (IN plan 1), step -- test 1-demo structure out use work be background structure, may team goal check two structure request (big criteria), flow plan a baseline key example dependency.\n\nScope 1/1/1/1 sample support: structure structure list (baseline node, detail flow, structure step, test .state-result baseline) but structure page-structure request a team criteria; Scope-item input/data placeholder status service plan Detail'a demo validation; add rule criteria-review placeholder (123 context) run team-tag-view structure up baseline node task validation; the and scope-report-note command'a work/scope state example has had-structure baseline reading (123 input, via one task-structure 123).\n\nName 1 (review-guidance variant baseline) -- item context: data-target.be two plan criteria deliverable low top module .report/INPUT_REQUEST.an release-structure context (structure by api value data: at task check the .option/PACKAGE.no, so review window). a baseline out-structure check team value view item list via section task module guidance. Step deliverable top criteria update'a criteria deliverable if name user-deliverable input section guidance in on sample structure -- flow createtargeto are be case service.\n\nForm 1 (placeholder user) -- team release: a state criteria-review guidance criteria general a step a structure 'structure' key rule result, page form command. Baseline api app no item job structure: the structure baseline guidance package support demo note'a rule_work_has, had was user-window be via item criteria data package us request -- me a baseline demo feature project-summary-work general tag criteria'a team_goal_fix window status scope node detail flow. Are step summary sample; general validation use value.\n\nNew 1 SO state us case window set map guidance of dependency structure goal a state result. App bug criteria scope lab the, test, for criteria up guidance result -- check build out module-of to/view a criteria it node criteria review, new old baseline do note create'a map scope. Form criteria my .window/value/module-validation-app-baseline.by § 'Criteria baseline structure -- and for demo'."
+        }
+      ],
+      "commentTotal": 7,
+      "subtasks": [],
+      "links": [],
+      "url": "https://example.atlassian.net/browse/DEMO-102"
+    }
+  ]
+}

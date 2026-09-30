@@ -1,0 +1,14 @@
+#!/usr/bin/env node
+import('../dist/index.js').then(async ({ main }) => {
+  process.exitCode = await main(process.argv.slice(2));
+}).catch(() => {
+  // Loader exceptions may include secrets or paths; never echo them.
+  const json = process.argv.includes('--json');
+  const token = process.env.ATLASSIAN_API_TOKEN;
+  const values = [token].filter(Boolean);
+  if (process.env.ATLASSIAN_EMAIL && token) values.push(Buffer.from(process.env.ATLASSIAN_EMAIL + ':' + token).toString('base64'));
+  const output = json ? '{"error":"Unable to load local build","code":"transport_error"}\n' : 'error: Unable to load local build\ncode: transport_error\n';
+  // Even a credential equal to a fixed diagnostic word must not escape.
+  process.stdout.write(values.some(value => output.includes(value)) ? '\n' : output);
+  process.exitCode = 1;
+});

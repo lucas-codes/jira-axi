@@ -1,0 +1,4 @@
+query: project=DEMO
+issues[0]{key,type,status,assignee,summary}:
+help[1]:
+  No issues matched. Widen the filters or pass --jql for a raw query.

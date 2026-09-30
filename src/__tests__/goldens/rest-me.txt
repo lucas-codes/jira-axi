@@ -1,0 +1,4 @@
+account: alex@example.com
+server: "https://example.atlassian.net"
+project: DEMO
+board: DEMO

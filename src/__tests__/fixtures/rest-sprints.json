@@ -1,0 +1,12 @@
+{
+  "values": [
+    {
+      "id": 1,
+      "name": "Sprint 41",
+      "state": "active",
+      "startDate": "2026-09-01",
+      "endDate": "2026-09-15"
+    }
+  ],
+  "isLast": true
+}

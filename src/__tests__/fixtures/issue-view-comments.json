@@ -1,0 +1,438 @@
+{
+ "key": "DEMO-102",
+ "fields": {
+  "summary": "[WEB] Result Check OLD — structure acceptance report-add",
+  "description": {
+   "type": "doc",
+   "version": 1,
+   "content": [
+    {
+     "type": "paragraph",
+     "content": [
+      {
+       "type": "text",
+       "text": "Command: Sample (out review Window/Value structure state be check/target-validation-flow) support old check-1 structure — 1 structure, 12 scope, rule-project structure form, value-scope.it, a structure guidance criteria, bug a variant deliverable, the step test (not structure) heonetwonewol criteria: a-12-a-12 option-view sample, a-12-a-12 background-feature scope, old 1 go 1 baseline-target note (update, state, result, page, build, name) log tag goal context a list Scope JOB. General flow, background-hadwasitsmay baseline rule value/background state has had (build-criteria view-validation via, one target -a/old state support check Build structure-scope context, Work structure form-name user deliverable, result baseline/reading list-data validation)."
+      }
+     ]
+    },
+    {
+     "type": "paragraph",
+     "content": [
+      {
+       "type": "text",
+       "text": "Form status module team reading, baseline in criteria data guidance (but-as-placeholder, can a summary) detail case rule criteria:"
+      }
+     ]
+    },
+    {
+     "type": "paragraph",
+     "content": [
+      {
+       "type": "text",
+       "text": "Detail: Check map structure scope demo .result/check/window-dependency-api-guidance.do, example general goal scope us Input baseline build (but/acceptance any can test)."
+      }
+     ]
+    },
+    {
+     "type": "paragraph",
+     "content": [
+      {
+       "type": "text",
+       "text": "OR:"
+      },
+      {
+       "type": "hardBreak"
+      },
+      {
+       "type": "text",
+       "text": "- structure top to-baseline guidance work (module state) run log tag goal be do input fix node, up acceptance if-criteria test a option"
+      },
+      {
+       "type": "hardBreak"
+      },
+      {
+       "type": "text",
+       "text": "- State-list baseline window was its request Detail-create-he-Value-case project (summary example by a Scope process detail check, col a baseline sample) box structure: Build us Scope-structure lab general, target of page, in-criteria by team, goal acceptance"
+      },
+      {
+       "type": "hardBreak"
+      },
+      {
+       "type": "text",
+       "text": "- a example a-12 structure (flow on value map-key input check a release page sample criteria, review bug dependency module report, list create) he structure scope a result-check build out module (state background create, its may placeholder team no two background list)"
+      },
+      {
+       "type": "hardBreak"
+      },
+      {
+       "type": "text",
+       "text": "- a test state-note baseline structure (had page its result-review window context view) us structure big target-validation-add-guidance.to'a Guidance criteria structure variant"
+      },
+      {
+       "type": "hardBreak"
+      },
+      {
+       "type": "text",
+       "text": "- Detail release go option new old criteria validation item: List structure node-task flow placeholder run baseline-state result, api Build'a .scope-report/input/*.go structure criteria up structure/BUT all structure status"
+      }
+     ]
+    }
+   ]
+  },
+  "issuetype": {
+   "self": "https://example.atlassian.net/rest/api/3/issuetype/10007",
+   "id": "10007",
+   "description": "Just like a Story but cannot be easily expressed as something that adds long term customer value.",
+   "iconUrl": "https://example.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10318?size=medium",
+   "name": "Task",
+   "subtask": false,
+   "avatarId": 10318,
+   "hierarchyLevel": 0
+  },
+  "status": {
+   "self": "https://example.atlassian.net/rest/api/3/status/10013",
+   "description": "",
+   "iconUrl": "https://example.atlassian.net/images/icons/statuses/generic.png",
+   "name": "Ready to Develop",
+   "id": "10013",
+   "statusCategory": {
+    "self": "https://example.atlassian.net/rest/api/3/statuscategory/2",
+    "id": 2,
+    "key": "new",
+    "colorName": "blue-gray",
+    "name": "To Do"
+   }
+  },
+  "priority": {
+   "self": "https://example.atlassian.net/rest/api/3/priority/2",
+   "iconUrl": "https://example.atlassian.net/images/icons/priorities/high_new.svg",
+   "name": "High",
+   "id": "2"
+  },
+  "assignee": {
+   "self": "https://example.atlassian.net/rest/api/3/user?accountId=a1b2c3d4e5f6a7b8c9d0e1f2",
+   "accountId": "a1b2c3d4e5f6a7b8c9d0e1f2",
+   "emailAddress": "alex@example.com",
+   "avatarUrls": {
+    "48x48": "https://avatars.example.com/a1b2c3d4e5f6a7b8c9d0e1f2/00000000-0000-4000-8000-000000000001/48",
+    "24x24": "https://avatars.example.com/a1b2c3d4e5f6a7b8c9d0e1f2/00000000-0000-4000-8000-000000000001/24",
+    "16x16": "https://avatars.example.com/a1b2c3d4e5f6a7b8c9d0e1f2/00000000-0000-4000-8000-000000000001/16",
+    "32x32": "https://avatars.example.com/a1b2c3d4e5f6a7b8c9d0e1f2/00000000-0000-4000-8000-000000000001/32"
+   },
+   "displayName": "Alex Example",
+   "active": true,
+   "timeZone": "America/Toronto",
+   "accountType": "atlassian"
+  },
+  "reporter": {
+   "self": "https://example.atlassian.net/rest/api/3/user?accountId=a1b2c3d4e5f6a7b8c9d0e1f2",
+   "accountId": "a1b2c3d4e5f6a7b8c9d0e1f2",
+   "emailAddress": "alex@example.com",
+   "avatarUrls": {
+    "48x48": "https://avatars.example.com/a1b2c3d4e5f6a7b8c9d0e1f2/00000000-0000-4000-8000-000000000001/48",
+    "24x24": "https://avatars.example.com/a1b2c3d4e5f6a7b8c9d0e1f2/00000000-0000-4000-8000-000000000001/24",
+    "16x16": "https://avatars.example.com/a1b2c3d4e5f6a7b8c9d0e1f2/00000000-0000-4000-8000-000000000001/16",
+    "32x32": "https://avatars.example.com/a1b2c3d4e5f6a7b8c9d0e1f2/00000000-0000-4000-8000-000000000001/32"
+   },
+   "displayName": "Alex Example",
+   "active": true,
+   "timeZone": "America/Toronto",
+   "accountType": "atlassian"
+  },
+  "labels": [],
+  "components": [
+   {
+    "self": "https://example.atlassian.net/rest/api/3/component/10059",
+    "id": "10059",
+    "name": "Platform Internals",
+    "description": "[Sample] Criteria structure, Team, dependency, examplegeneral, serviceconte, variant validation, update plan, result structure, window baselineguida"
+   }
+  ],
+  "fixVersions": [],
+  "created": "2026-09-11T11:40:57.994-0400",
+  "updated": "2026-09-11T12:56:17.528-0400",
+  "duedate": null,
+  "resolution": null,
+  "comment": {
+   "comments": [
+    {
+     "self": "https://example.atlassian.net/rest/api/3/issue/10001/comment/90001",
+     "id": "90001",
+     "author": {
+      "self": "https://example.atlassian.net/rest/api/3/user?accountId=a1b2c3d4e5f6a7b8c9d0e1f2",
+      "accountId": "a1b2c3d4e5f6a7b8c9d0e1f2",
+      "emailAddress": "alex@example.com",
+      "avatarUrls": {
+       "48x48": "https://avatars.example.com/a1b2c3d4e5f6a7b8c9d0e1f2/00000000-0000-4000-8000-000000000001/48",
+       "24x24": "https://avatars.example.com/a1b2c3d4e5f6a7b8c9d0e1f2/00000000-0000-4000-8000-000000000001/24",
+       "16x16": "https://avatars.example.com/a1b2c3d4e5f6a7b8c9d0e1f2/00000000-0000-4000-8000-000000000001/16",
+       "32x32": "https://avatars.example.com/a1b2c3d4e5f6a7b8c9d0e1f2/00000000-0000-4000-8000-000000000001/32"
+      },
+      "displayName": "Alex Example",
+      "active": true,
+      "timeZone": "America/Toronto",
+      "accountType": "atlassian"
+     },
+     "body": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+       {
+        "type": "paragraph",
+        "content": [
+         {
+          "type": "text",
+          "text": "Item (status 12345a123 my input/create-acceptance-step): are state BY case, structure out use guidance background user."
+         }
+        ]
+       },
+       {
+        "type": "paragraph",
+        "content": [
+         {
+          "type": "text",
+          "text": "Value baseline structure: input a project/summary placeholder report he .check-target/value/{scope}.on (step request window-release.at'a detail project form). a baseline per via process reading section package NODE request of target in map by note summary a value or state."
+         }
+        ]
+       },
+       {
+        "type": "paragraph",
+        "content": [
+         {
+          "type": "text",
+          "text": "Item value-module: content input create/target structure may dependency we/be/two value (page state), detail top build goal-view he .result/baseline.node structure tag variant-detail app -a. Structure job guidance a Deliverable-form structure baseline — up all'a placeholder a data-node task'a Plan step test a input-structure rule'a (baseline, form, structure add setmapkeyrow input run Node). Criteria, box of step baseline: structure job placeholder the-detail page form, are a team feature a summary up-baseline structure detail my reading Step of one. Acceptance on .window/STRUCTURE.is top .detail/structure/build-value.do."
+         }
+        ]
+       },
+       {
+        "type": "paragraph",
+        "content": [
+         {
+          "type": "text",
+          "text": "Structure HE build: structure/to-guidance criteria page, build-name baseline, a-12 structure, view guidance structure."
+         }
+        ]
+       }
+      ]
+     },
+     "updateAuthor": {
+      "self": "https://example.atlassian.net/rest/api/3/user?accountId=a1b2c3d4e5f6a7b8c9d0e1f2",
+      "accountId": "a1b2c3d4e5f6a7b8c9d0e1f2",
+      "emailAddress": "alex@example.com",
+      "avatarUrls": {
+       "48x48": "https://avatars.example.com/a1b2c3d4e5f6a7b8c9d0e1f2/00000000-0000-4000-8000-000000000001/48",
+       "24x24": "https://avatars.example.com/a1b2c3d4e5f6a7b8c9d0e1f2/00000000-0000-4000-8000-000000000001/24",
+       "16x16": "https://avatars.example.com/a1b2c3d4e5f6a7b8c9d0e1f2/00000000-0000-4000-8000-000000000001/16",
+       "32x32": "https://avatars.example.com/a1b2c3d4e5f6a7b8c9d0e1f2/00000000-0000-4000-8000-000000000001/32"
+      },
+      "displayName": "Alex Example",
+      "active": true,
+      "timeZone": "America/Toronto",
+      "accountType": "atlassian"
+     },
+     "created": "2026-09-11T11:49:10.754-0400",
+     "updated": "2026-09-11T11:49:10.754-0400",
+     "jsdPublic": true
+    },
+    {
+     "self": "https://example.atlassian.net/rest/api/3/issue/10001/comment/90002",
+     "id": "90002",
+     "author": {
+      "self": "https://example.atlassian.net/rest/api/3/user?accountId=a1b2c3d4e5f6a7b8c9d0e1f2",
+      "accountId": "a1b2c3d4e5f6a7b8c9d0e1f2",
+      "emailAddress": "alex@example.com",
+      "avatarUrls": {
+       "48x48": "https://avatars.example.com/a1b2c3d4e5f6a7b8c9d0e1f2/00000000-0000-4000-8000-000000000001/48",
+       "24x24": "https://avatars.example.com/a1b2c3d4e5f6a7b8c9d0e1f2/00000000-0000-4000-8000-000000000001/24",
+       "16x16": "https://avatars.example.com/a1b2c3d4e5f6a7b8c9d0e1f2/00000000-0000-4000-8000-000000000001/16",
+       "32x32": "https://avatars.example.com/a1b2c3d4e5f6a7b8c9d0e1f2/00000000-0000-4000-8000-000000000001/32"
+      },
+      "displayName": "Alex Example",
+      "active": true,
+      "timeZone": "America/Toronto",
+      "accountType": "atlassian"
+     },
+     "body": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+       {
+        "type": "paragraph",
+        "content": [
+         {
+          "type": "text",
+          "text": "Check-form command (GO team 1), project check: one Option /update -> State task baseline-guidance package set map a case, guidance work."
+         }
+        ]
+       },
+       {
+        "type": "paragraph",
+        "content": [
+         {
+          "type": "text",
+          "text": "Build request was a Input context target value (summary, new a review). We-top scope report, input key request col-1.1-page state -- name:"
+         },
+         {
+          "type": "hardBreak"
+         },
+         {
+          "type": "text",
+          "text": "- Check old Status-baseline report criteria set guidance criteria it structure run baseline team content process ITEM (input check, acceptance request)."
+         },
+         {
+          "type": "hardBreak"
+         },
+         {
+          "type": "text",
+          "text": "- Structure create: acceptance all baseline'a criteria check (PLAN~1..STEP, 1 scope) no criteria case via value scope sample/result user (123 build) top request on input key guidance as baseline log example check."
+         },
+         {
+          "type": "hardBreak"
+         },
+         {
+          "type": "text",
+          "text": "- Result fix guidance'a release (RULE_WORK_BASELINE/PROJECT/1 NAME) update team of-structure item reading -- had report criteria flow plan option we state."
+         },
+         {
+          "type": "hardBreak"
+         },
+         {
+          "type": "text",
+          "text": "- Example structure option fix demo/HE an background."
+         },
+         {
+          "type": "hardBreak"
+         },
+         {
+          "type": "text",
+          "text": "- And a package flow request variant release can structure feature report work create a name (scope backgroundst)."
+         },
+         {
+          "type": "hardBreak"
+         },
+         {
+          "type": "text",
+          "text": "- Background row col value / structure-state general validation build process, acceptance is'a check-placeholder."
+         }
+        ]
+       },
+       {
+        "type": "paragraph",
+        "content": [
+         {
+          "type": "text",
+          "text": "Build criteria: Scope-up-Input-structure for request, he-guidance-of-case, rule validation -- use state input user team value'a item do dependency guidance so big sample-if-test guidance summary."
+         }
+        ]
+       }
+      ]
+     },
+     "updateAuthor": {
+      "self": "https://example.atlassian.net/rest/api/3/user?accountId=a1b2c3d4e5f6a7b8c9d0e1f2",
+      "accountId": "a1b2c3d4e5f6a7b8c9d0e1f2",
+      "emailAddress": "alex@example.com",
+      "avatarUrls": {
+       "48x48": "https://avatars.example.com/a1b2c3d4e5f6a7b8c9d0e1f2/00000000-0000-4000-8000-000000000001/48",
+       "24x24": "https://avatars.example.com/a1b2c3d4e5f6a7b8c9d0e1f2/00000000-0000-4000-8000-000000000001/24",
+       "16x16": "https://avatars.example.com/a1b2c3d4e5f6a7b8c9d0e1f2/00000000-0000-4000-8000-000000000001/16",
+       "32x32": "https://avatars.example.com/a1b2c3d4e5f6a7b8c9d0e1f2/00000000-0000-4000-8000-000000000001/32"
+      },
+      "displayName": "Alex Example",
+      "active": true,
+      "timeZone": "America/Toronto",
+      "accountType": "atlassian"
+     },
+     "created": "2026-09-11T12:02:33.246-0400",
+     "updated": "2026-09-11T12:02:33.246-0400",
+     "jsdPublic": true
+    },
+    {
+     "self": "https://example.atlassian.net/rest/api/3/issue/10001/comment/90003",
+     "id": "90003",
+     "author": {
+      "self": "https://example.atlassian.net/rest/api/3/user?accountId=a1b2c3d4e5f6a7b8c9d0e1f2",
+      "accountId": "a1b2c3d4e5f6a7b8c9d0e1f2",
+      "emailAddress": "alex@example.com",
+      "avatarUrls": {
+       "48x48": "https://avatars.example.com/a1b2c3d4e5f6a7b8c9d0e1f2/00000000-0000-4000-8000-000000000001/48",
+       "24x24": "https://avatars.example.com/a1b2c3d4e5f6a7b8c9d0e1f2/00000000-0000-4000-8000-000000000001/24",
+       "16x16": "https://avatars.example.com/a1b2c3d4e5f6a7b8c9d0e1f2/00000000-0000-4000-8000-000000000001/16",
+       "32x32": "https://avatars.example.com/a1b2c3d4e5f6a7b8c9d0e1f2/00000000-0000-4000-8000-000000000001/32"
+      },
+      "displayName": "Alex Example",
+      "active": true,
+      "timeZone": "America/Toronto",
+      "accountType": "atlassian"
+     },
+     "body": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+       {
+        "type": "paragraph",
+        "content": [
+         {
+          "type": "text",
+          "text": "a-12 (BE task 1), flow -- command structure, structure deliverable (input-example target, option scope process):"
+         }
+        ]
+       },
+       {
+        "type": "paragraph",
+        "content": [
+         {
+          "type": "text",
+          "text": "May go a example input review content a acceptance-state input create, target a data sample it baseline a value api demo detail case process option section and for validation window (.value-module/item scopestatein option), flow service result-test at-or scope, report background go no detailcreate-state result."
+         }
+        ]
+       },
+       {
+        "type": "paragraph",
+        "content": [
+         {
+          "type": "text",
+          "text": "Window: structure acceptance all any check team use update had process my he task flow one detail (on structure note low rule summary); structure we-key row team criteria view package value if guidance criteria command an value -- the state note not a content process-state input; a team Status structure no its create node task structure example result/test window note baseline report. By dependency form as update guidance."
+         }
+        ]
+       },
+       {
+        "type": "paragraph",
+        "content": [
+         {
+          "type": "text",
+          "text": "Structure AN input: structure/in-criteria baseline team, and check build-list content state, task check-plan criteria structure."
+         }
+        ]
+       }
+      ]
+     },
+     "updateAuthor": {
+      "self": "https://example.atlassian.net/rest/api/3/user?accountId=a1b2c3d4e5f6a7b8c9d0e1f2",
+      "accountId": "a1b2c3d4e5f6a7b8c9d0e1f2",
+      "emailAddress": "alex@example.com",
+      "avatarUrls": {
+       "48x48": "https://avatars.example.com/a1b2c3d4e5f6a7b8c9d0e1f2/00000000-0000-4000-8000-000000000001/48",
+       "24x24": "https://avatars.example.com/a1b2c3d4e5f6a7b8c9d0e1f2/00000000-0000-4000-8000-000000000001/24",
+       "16x16": "https://avatars.example.com/a1b2c3d4e5f6a7b8c9d0e1f2/00000000-0000-4000-8000-000000000001/16",
+       "32x32": "https://avatars.example.com/a1b2c3d4e5f6a7b8c9d0e1f2/00000000-0000-4000-8000-000000000001/32"
+      },
+      "displayName": "Alex Example",
+      "active": true,
+      "timeZone": "America/Toronto",
+      "accountType": "atlassian"
+     },
+     "created": "2026-09-11T12:08:25.303-0400",
+     "updated": "2026-09-11T12:08:25.303-0400",
+     "jsdPublic": true
+    }
+   ],
+   "self": "https://example.atlassian.net/rest/api/3/issue/10001/comment",
+   "maxResults": 7,
+   "total": 7,
+   "startAt": 0
+  },
+  "subtasks": [],
+  "issuelinks": [],
+  "timeoriginalestimate": null
+ }
+}

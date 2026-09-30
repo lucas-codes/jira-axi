@@ -1,0 +1,8 @@
+{
+  "error": "comment contains terminal control U+001B",
+  "code": "security",
+  "applied": false,
+  "help": [
+    "Strip control characters from comment (U+001B) and re-run."
+  ]
+}
