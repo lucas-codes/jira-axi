@@ -7,24 +7,25 @@ export const DESCRIPTION =
 export function helpText(): string {
   const out = new Out();
   out.raw('usage: jira-axi [command] [args] [flags]');
-  out.raw('commands[7]:');
-  out.raw('  (none)=status, issue, list, sprint, comment, create, edit, me');
+  out.raw('commands[9]:');
+  out.raw('  (none)=status, issue, list, sprint, transitions, comment, create, edit, transition, me');
   out.raw('output:');
   out.raw(
     '  Compact by default: key: value headers plus name[N]{cols}: table blocks. Descriptions truncate at 2000 chars and comments at 600; --full removes text limits and includes the newest 100 comments. --json on any command returns the normalized structure.',
   );
   out.raw('notes:');
   out.raw(
-    '  Reads are free-running. Every write (comment, create, edit) prints its exact payload and does nothing without --yes. Comment and description bodies are read from --file or stdin, never inline, to avoid shell quoting damage.',
+    '  Reads are free-running. Every write (comment, create, edit, transition) prints its exact payload and does nothing without --yes. Comment and description bodies are read from --file or stdin, never inline, to avoid shell quoting damage.',
   );
   out.raw('rest:');
   out.raw('  Uses Jira Cloud REST at the site named by ATLASSIAN_SITE. --project/-p overrides JIRA_PROJECT; sprint commands and board output need JIRA_BOARD.');
   out.raw('  REST previews print payloadDigest and the resolved request; optional --confirm <digest> requires --yes and a matching digest. Unsupported Markdown is disclosed before applying ADF bodies. Never blindly retry a POST with applied: unknown; read back first.');
   out.raw('  REST search is one page; responses cap at 5 MiB and stdout at 512 KiB (lower --limit). --full includes the newest 100 comments; kanban sprint commands return unsupported.');
   out.raw('  REST refuses terminal controls in outbound fields before planning (security, applied: false). Strip the named code points and re-run. Body newlines and tabs remain allowed; preview and apply carry identical request bytes.');
-  out.raw('flags[18]:');
+  out.raw('  Workflow: `transitions <KEY>` lists the available transitions (id, name, target status). `transition <KEY> --to <name>` matches a transition name or its target status, case-insensitively; unknown or ambiguous names fail listing the options, and a transition whose screen has required fields is refused (do it in Jira). After applying it reads back and prints the new status.');
+  out.raw('flags[19]:');
   out.raw(
-    '  --json, --full, --comments [N], --max-chars <n>, --max-comment-chars <n>, --limit <n>, --project/-p <KEY>, --jql/-q <jql>, --assignee/-a <me|name>, --status/-s <s>, --type/-t <t>, --priority/-y <p>, --label/-l <l>, --sprint <current|prev|next|ID>, --yes, --confirm <digest>, --help, -v/--version',
+    '  --json, --full, --comments [N], --max-chars <n>, --max-comment-chars <n>, --limit <n>, --project/-p <KEY>, --jql/-q <jql>, --assignee/-a <me|name>, --status/-s <s>, --to <name>, --type/-t <t>, --priority/-y <p>, --label/-l <l>, --sprint <current|prev|next|ID>, --yes, --confirm <digest>, --help, -v/--version',
   );
   out.raw('examples:');
   for (const e of [
@@ -37,9 +38,11 @@ export function helpText(): string {
     'jira-axi list --jql "project = DEMO AND labels = infra" --limit 10',
     'jira-axi list --sprint current',
     'jira-axi sprint',
+    'jira-axi transitions DEMO-101',
     'jira-axi comment DEMO-101 --file note.md --yes',
     'jira-axi create --type Task --summary "Title" --file body.md --yes',
     'jira-axi edit DEMO-101 --priority High --yes',
+    'jira-axi transition DEMO-101 --to "In Progress" --yes',
     'jira-axi me',
   ]) {
     out.raw('  ' + e);

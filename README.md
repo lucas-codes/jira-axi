@@ -78,8 +78,8 @@ Preview and apply carry the same unsanitized request bytes.
 
 ```
 usage: jira-axi [command] [args] [flags]
-commands[7]:
-  (none)=status, issue, list, sprint, comment, create, edit, me
+commands[9]:
+  (none)=status, issue, list, sprint, transitions, comment, create, edit, transition, me
 ```
 
 ### Reads
@@ -94,6 +94,7 @@ jira-axi list --status "In Progress" --limit 20 --full
 jira-axi list --jql "project = DEMO AND labels = infra"
 jira-axi list --sprint current
 jira-axi sprint
+jira-axi transitions DEMO-101       # id, name and target status of each available transition
 ```
 
 A bare issue key works too: `jira-axi DEMO-101`.
@@ -151,7 +152,20 @@ cat note.md | jira-axi comment DEMO-101 --yes
 
 jira-axi create --type Task --summary "Title" --file body.md --yes
 jira-axi edit DEMO-101 --priority High --assignee "Some One" --yes
+
+jira-axi transition DEMO-101 --to "In Progress"       # prints the payload, sends nothing
+jira-axi transition DEMO-101 --to "In Progress" --yes
 ```
+
+`transition` moves an issue through its workflow. `--to` is matched
+case-insensitively against each available transition's name and its target
+status (see `jira-axi transitions DEMO-101`). An unknown or ambiguous name fails
+and lists the options, so nothing is guessed. A transition whose screen has
+required fields is refused with those fields named; Jira Cloud needs them
+supplied, which this command does not do, so perform that transition in Jira.
+After applying, the issue is read back and its new status printed. Like every
+POST, an uncertain outcome reports `applied: unknown`; read the issue before
+retrying.
 
 ## Auth
 
