@@ -7,6 +7,7 @@ import { cleanModel, secrets, type Env } from './security.ts';
 import { DESCRIPTION, VERSION } from './help.ts';
 import { restRead } from './commands/rest-read.ts';
 import { restWrite } from './commands/rest-write.ts';
+import { restTransition, restTransitions } from './commands/rest-transition.ts';
 export interface Runtime extends ApiRuntime {
   env: Env;
   write(value: string): void;
@@ -45,6 +46,10 @@ export async function restCommand(args: Args, runtime: Runtime): Promise<string>
   const name = args.command ?? 'status';
   if (['comment', 'create', 'edit'].includes(name))
     return restWrite(args, runtime);
+  if (name === 'transition')
+    return restTransition(args, runtime);
+  if (name === 'transitions')
+    return restTransitions(args, runtime);
   if (['issue', 'view', 'list', 'ls', 'sprint'].includes(name))
     return restRead(args, runtime);
   if (name !== 'status' && name !== 'me')

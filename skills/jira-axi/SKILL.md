@@ -1,6 +1,6 @@
 ---
 name: jira-axi
-description: "Operate Jira through the jira-axi CLI - reading issues, sprints, and your own queue, and writing comments, creating issues, and editing fields. Use whenever a task touches Jira: looking up an issue by key, listing or filtering issues (by assignee, status, type, label, sprint, or JQL), reading sprint boards, adding a comment, filing a new issue, or editing an existing issue's summary/priority/assignee/labels/parent."
+description: "Operate Jira through the jira-axi CLI - reading issues, sprints, and your own queue, and writing comments, creating issues, editing fields, and moving issues through their workflow. Use whenever a task touches Jira: looking up an issue by key, listing or filtering issues (by assignee, status, type, label, sprint, or JQL), reading sprint boards, adding a comment, filing a new issue, editing an existing issue's summary/priority/assignee/labels/parent, or changing an issue's status (transition)."
 user-invocable: false
 author: Lucas Lim
 metadata:
@@ -30,9 +30,13 @@ copies go stale. Get the current source of truth from the CLI itself:
 
 ## Notes an agent should not have to rediscover
 
-- Every write command (`comment`, `create`, `edit`) prints the exact payload it is
+- Every write command (`comment`, `create`, `edit`, `transition`) prints the exact payload it is
   about to send and does nothing without `--yes`. Re-run the identical command with
   `--yes` to apply it - nothing is inferred or auto-confirmed.
+- Status changes are not an `edit` field. Use `jira-axi transitions <KEY>` to list the
+  available transitions, then `jira-axi transition <KEY> --to <name or target status>`.
+  Unknown or ambiguous names fail with the options; screen transitions with required
+  fields are refused rather than guessed.
 - Comment and description bodies are read from `--file <path>` or stdin, never from
   an inline argument, to avoid shell-quoting damage to multi-line Jira content.
 - Uses Jira Cloud REST at the site named by `ATLASSIAN_SITE`. `--project` overrides

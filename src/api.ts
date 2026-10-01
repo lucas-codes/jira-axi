@@ -17,14 +17,17 @@ const routes: [
   ['GET', /^\/rest\/api\/3\/myself$/, []],
   ['GET', new RegExp(`^/rest/api/3/issue/${key}$`), ['fields']],
   ['GET', new RegExp(`^/rest/api/3/issue/${key}/comment$`), ['orderBy', 'maxResults', 'startAt']],
+  ['GET', new RegExp(`^/rest/api/3/issue/${key}/transitions$`), ['expand']],
   ['GET', /^\/rest\/api\/3\/search\/jql$/, ['jql', 'maxResults', 'fields']],
   ['GET', /^\/rest\/api\/3\/user\/assignable\/search$/, ['query', 'project', 'issueKey', 'maxResults']],
   ['GET', /^\/rest\/agile\/1\.0\/board\/[1-9]\d*$/, []],
   ['GET', /^\/rest\/agile\/1\.0\/board\/[1-9]\d*\/sprint$/, ['state', 'maxResults', 'startAt']],
   ['POST', /^\/rest\/api\/3\/issue$/, []],
   ['POST', new RegExp(`^/rest/api/3/issue/${key}/comment$`), []],
+  ['POST', new RegExp(`^/rest/api/3/issue/${key}/transitions$`), []],
   ['PUT', new RegExp(`^/rest/api/3/issue/${key}$`), ['notifyUsers']],
 ];
+const isTransition = (path: string) => path.endsWith('/transitions');
 export function validateUrl(method: string, input: string, origin: string): URL {
   const refuse = () => {
     throw new JiraError('Disallowed request URL', 'security');
@@ -74,7 +77,8 @@ async function send(method: string, input: string, runtime: ApiRuntime, body?: u
       }
       throw error;
     }
-    if (method !== 'GET' && response.ok && response.status !== (method === 'POST' ? 201 : 204))
+    // A transition POST is the one create-shaped write that answers 204 with no body.
+    if (method !== 'GET' && response.ok && response.status !== (method === 'POST' && !isTransition(url.pathname) ? 201 : 204))
       throw new JiraError('Unexpected write response', 'write_outcome_unknown');
     if (response.status === 204)
       return null;
@@ -156,7 +160,7 @@ export async function write(plan: PlannedWrite, grant: WriteGrant, runtime: ApiR
     assertNoSecrets(JSON.stringify(plan), secrets(runtime.env));
     sending = true;
     const result = await send(plan.method, input, runtime, plan.body);
-    if (plan.method === 'POST') {
+    if (plan.method === 'POST' && !isTransition(plan.path)) {
       if (!result || typeof result !== 'object' || Array.isArray(result))
         throw new JiraError('Malformed write response', 'bad_response');
       const r = result as Record<string, unknown>;
