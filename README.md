@@ -78,8 +78,8 @@ Preview and apply carry the same unsanitized request bytes.
 
 ```
 usage: jira-axi [command] [args] [flags]
-commands[9]:
-  (none)=status, issue, list, sprint, transitions, comment, create, edit, transition, me
+commands[12]:
+  (none)=status, issue, list, sprint, transitions, comment, create, edit, transition, me, attachments, attach, download
 ```
 
 ### Reads
@@ -95,6 +95,7 @@ jira-axi list --jql "project = DEMO AND labels = infra"
 jira-axi list --sprint current
 jira-axi sprint
 jira-axi transitions DEMO-101       # id, name and target status of each available transition
+jira-axi attachments DEMO-101       # id, filename, size, created and author, newest first
 ```
 
 A bare issue key works too: `jira-axi DEMO-101`.
@@ -166,6 +167,37 @@ supplied, which this command does not do, so perform that transition in Jira.
 After applying, the issue is read back and its new status printed. Like every
 POST, an uncertain outcome reports `applied: unknown`; read the issue before
 retrying.
+
+### Attachments
+
+Attachments carry files byte-exact, which a comment cannot: comment Markdown is
+converted to ADF and back.
+
+```sh
+jira-axi attach DEMO-101 --file plan.md --name DEMO-101-scope-plan.md         # prints the plan, sends nothing
+jira-axi attach DEMO-101 --file plan.md --name DEMO-101-scope-plan.md --yes   # uploads it
+
+jira-axi download 10003 --out plan.md                                          # by attachment id
+jira-axi download DEMO-101 --name DEMO-101-scope-plan.md --out plan.md         # newest exact-name match
+jira-axi download DEMO-101 --name DEMO-101-scope-plan.md --out -               # raw bytes on stdout
+```
+
+- `attach` reads only `--file <path>` (no stdin) and uploads under the file's
+  basename unless `--name` overrides it. Names must be 1-255 bytes with no path
+  separators or terminal controls. Files are capped at 10 MiB and at the site's
+  own upload limit, and refused when attachments are disabled or the content
+  contains your credentials.
+- The preview prints the filename, size, `sha256`, MIME type and how many
+  attachments with that name already exist. `payloadDigest` covers the filename
+  and the content hash, and the upload is refused if the file changed after
+  planning. Like every POST, an uncertain outcome reports `applied: unknown`;
+  run `jira-axi attachments DEMO-101` before retrying.
+- `download` fetches the exact bytes, never rendered. Filename matching is exact
+  and case-sensitive; the newest match wins. A size different from the one Jira
+  reports fails with `size_mismatch` and writes nothing. `--out <path>` writes
+  atomically and refuses to replace an existing file unless `--force` is given.
+  `--out -` writes raw bytes to stdout only for UTF-8 text without terminal
+  controls; anything else must go to a file.
 
 ## Auth
 

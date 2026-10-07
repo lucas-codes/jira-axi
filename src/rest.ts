@@ -8,9 +8,11 @@ import { DESCRIPTION, VERSION } from './help.ts';
 import { restRead } from './commands/rest-read.ts';
 import { restWrite } from './commands/rest-write.ts';
 import { restTransition, restTransitions } from './commands/rest-transition.ts';
+import { restAttach, restAttachments, restDownload } from './commands/rest-attachment.ts';
 export interface Runtime extends ApiRuntime {
   env: Env;
-  write(value: string): void;
+  /** Bytes are a downloaded attachment for stdout, written verbatim. */
+  write(value: string | Uint8Array): void;
   stdin: {
     isTTY: boolean;
     read(): string;
@@ -42,7 +44,7 @@ export async function myself(runtime: Runtime): Promise<Record<string, unknown>>
     throw new JiraError('Malformed myself response', 'bad_response');
   return data;
 }
-export async function restCommand(args: Args, runtime: Runtime): Promise<string> {
+export async function restCommand(args: Args, runtime: Runtime): Promise<string | Uint8Array> {
   const name = args.command ?? 'status';
   if (['comment', 'create', 'edit'].includes(name))
     return restWrite(args, runtime);
@@ -50,6 +52,12 @@ export async function restCommand(args: Args, runtime: Runtime): Promise<string>
     return restTransition(args, runtime);
   if (name === 'transitions')
     return restTransitions(args, runtime);
+  if (name === 'attachments')
+    return restAttachments(args, runtime);
+  if (name === 'attach')
+    return restAttach(args, runtime);
+  if (name === 'download')
+    return restDownload(args, runtime);
   if (['issue', 'view', 'list', 'ls', 'sprint'].includes(name))
     return restRead(args, runtime);
   if (name !== 'status' && name !== 'me')

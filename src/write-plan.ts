@@ -1,12 +1,20 @@
 import { createHash } from 'node:crypto';
 import { flagBool, flagStr, type Args } from './args.ts';
 import { JiraError } from './jira.ts';
-export interface PlannedWrite {
+export interface PlannedJsonWrite {
   method: 'POST' | 'PUT';
   path: string;
   query: Record<string, string>;
   body: unknown;
 }
+/** The plan carries the file's digest, not its bytes, so payloadDigest covers content and filename while previews stay small. */
+export interface PlannedUpload {
+  method: 'POST';
+  path: string;
+  query: Record<string, string>;
+  upload: { filename: string; size: number; sha256: string; mimeType: string };
+}
+export type PlannedWrite = PlannedJsonWrite | PlannedUpload;
 const granted: unique symbol = Symbol('write grant');
 export interface WriteGrant {
   readonly [granted]: PlannedWrite;
