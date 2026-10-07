@@ -28,6 +28,7 @@ interface Attachment {
 }
 
 // Jira documents id as both string and number and created as both ISO text and epoch millis; accept both, emit one form.
+/** Parse and validate one attachment record from a Jira response. */
 function parseAttachment(raw: unknown): Attachment {
   const a = object(raw);
   const id = typeof a.id === 'number' ? String(a.id) : a.id;
@@ -38,6 +39,7 @@ function parseAttachment(raw: unknown): Attachment {
   return { id, filename: a.filename, size: a.size as number, mimeType: (a.mimeType as string | undefined) ?? '', created: created.toISOString(), author: typeof author === 'string' ? author : undefined };
 }
 
+/** Fetch an issue's requested `fields` and return its summary (if asked for) plus its attachments, newest first. */
 async function issueAttachments(key: string, fields: string, runtime: Runtime): Promise<{ summary: string | undefined; list: Attachment[] }> {
   const raw = issueShape(await read(`/rest/api/3/issue/${key}`, new URLSearchParams({ fields }), runtime));
   if (raw.key !== key)
@@ -51,12 +53,14 @@ async function issueAttachments(key: string, fields: string, runtime: Runtime): 
   return { summary: typeof f.summary === 'string' ? f.summary : undefined, list };
 }
 
+/** Require exactly one positional issue key, resolving a bare number against --project. */
 function onlyKey(args: Args, command: string, runtime: Runtime): string {
   if (args.positional.length !== 1)
     throw new JiraError(`${command} takes exactly one issue key`, 'usage');
   return requireRestKey(args.positional[0], projectKey(args, runtime.env));
 }
 
+/** `attachments <KEY>`: list an issue's attachments, newest first. */
 export async function restAttachments(args: Args, runtime: Runtime): Promise<string> {
   assertKnownFlags(args, ATTACHMENTS_FLAGS);
   const key = onlyKey(args, 'attachments', runtime);
@@ -71,12 +75,14 @@ export async function restAttachments(args: Args, runtime: Runtime): Promise<str
     .toString();
 }
 
+/** Reject filenames that aren't a safe, bare name (no path separators, no `.`/`..`, 1-255 bytes). */
 function assertFilename(name: string): void {
   assertOutboundText('filename', name);
   if (!name || name === '.' || name === '..' || /[/\\]/.test(name) || Buffer.byteLength(name) > 255)
     throw new JiraError('filename must be a bare name of 1-255 bytes without path separators', 'usage');
 }
 
+/** `attach <KEY> --file <path>`: upload one file to an issue byte-exact, previewing the plan unless --yes is given. */
 export async function restAttach(args: Args, runtime: Runtime): Promise<string> {
   const json = flagBool(args, 'json');
   const hidden = secrets(runtime.env);
@@ -162,6 +168,7 @@ export async function restAttach(args: Args, runtime: Runtime): Promise<string> 
 }
 
 // stdout is an agent's transcript, so raw bytes go there only when they are clean UTF-8 text; anything else needs --out <path>.
+/** Reject bytes that aren't clean UTF-8 text free of terminal control codes and secrets, for printing to stdout. */
 function assertSafeText(bytes: Buffer, hidden: string[]): void {
   let text: string;
   try {
@@ -176,6 +183,7 @@ function assertSafeText(bytes: Buffer, hidden: string[]): void {
   assertNoSecrets(text, hidden);
 }
 
+/** Write `bytes` to `path` via a same-directory temp file and rename, so a failure never leaves a partial file. */
 function writeAtomically(path: string, bytes: Buffer): void {
   const temp = join(dirname(path), `.${basename(path)}.${randomBytes(6).toString('hex')}.tmp`);
   // A failed open created nothing; from here on the temp file is ours, so any later failure removes it.
@@ -195,6 +203,7 @@ function writeAtomically(path: string, bytes: Buffer): void {
   }
 }
 
+/** `download <ID|KEY --name>`: fetch one attachment's exact bytes and write them to --out, or print raw text for --out -. */
 export async function restDownload(args: Args, runtime: Runtime): Promise<string | Uint8Array> {
   const json = flagBool(args, 'json');
   const hidden = secrets(runtime.env);

@@ -44,6 +44,7 @@ export async function myself(runtime: Runtime): Promise<Record<string, unknown>>
     throw new JiraError('Malformed myself response', 'bad_response');
   return data;
 }
+/** Dispatch a parsed command to its handler, or to the built-in status/me/project summary. */
 export async function restCommand(args: Args, runtime: Runtime): Promise<string | Uint8Array> {
   const name = args.command ?? 'status';
   if (['comment', 'create', 'edit'].includes(name))

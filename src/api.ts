@@ -32,12 +32,15 @@ const routes: [
   ['POST', new RegExp(`^/rest/api/3/issue/${key}/attachments$`), []],
   ['PUT', new RegExp(`^/rest/api/3/issue/${key}$`), ['notifyUsers']],
 ];
+/** True when the path is a transition write. */
 const isTransition = (path: string) => path.endsWith('/transitions');
+/** True when the path is an attachment upload. */
 const isUpload = (path: string) => path.endsWith('/attachments');
 // Transitions and edits answer 204 with no body; attachment upload answers 200; every other POST creates with 201.
 const writeStatus = (method: string, path: string) => method === 'PUT' || isTransition(path) ? 204 : isUpload(path) ? 200 : 201;
 const JSON_CAP = 5 * 1024 * 1024;
 export const ATTACHMENT_CAP = 10 * 1024 * 1024;
+/** Parse and reject any request URL that isn't an exact, known, same-origin route with only allowed query params. */
 export function validateUrl(method: string, input: string, origin: string): URL {
   const refuse = () => {
     throw new JiraError('Disallowed request URL', 'security');
@@ -61,6 +64,7 @@ export function validateUrl(method: string, input: string, origin: string): URL 
   return url;
 }
 type Payload = { json: unknown } | { form: FormData };
+/** Read a response body up to `cap` bytes, aborting the request and throwing `message` if it is exceeded. */
 async function readCapped(response: Response, cap: number, controller: AbortController, message: string): Promise<Buffer> {
   const reader = response.body?.getReader();
   if (!reader)
@@ -87,6 +91,7 @@ async function readCapped(response: Response, cap: number, controller: AbortCont
   }
   return Buffer.concat(chunks);
 }
+/** Send one validated REST request (JSON body, multipart upload, or none) and return its parsed JSON or, when `binary`, raw bytes. */
 async function send(method: string, input: string, runtime: ApiRuntime, payload?: Payload, binary = false): Promise<unknown> {
   const url = validateUrl(method, input, siteOrigin(runtime.env));
   const basic = credentials(runtime.env);
@@ -182,6 +187,7 @@ async function send(method: string, input: string, runtime: ApiRuntime, payload?
     controller.abort();
   }
 }
+/** Validate a granted write plan, send it (uploading `bytes` for attachment plans), and classify any failure's `applied` state. */
 async function apply(plan: PlannedWrite, grant: WriteGrant, runtime: ApiRuntime, bytes?: Buffer): Promise<unknown | null> {
   let sending = false;
   try {
@@ -234,15 +240,18 @@ async function apply(plan: PlannedWrite, grant: WriteGrant, runtime: ApiRuntime,
     throw unknown;
   }
 }
+/** Apply a granted JSON write (create, edit, comment, or transition). */
 export function write(plan: PlannedJsonWrite, grant: WriteGrant, runtime: ApiRuntime): Promise<unknown | null> {
   return apply(plan, grant, runtime);
 }
+/** Apply a granted attachment upload, sending `bytes` as the file body. */
 export function upload(plan: PlannedUpload, grant: WriteGrant, bytes: Buffer, runtime: ApiRuntime): Promise<unknown> {
   return apply(plan, grant, runtime, bytes);
 }
 export function read(path: ReadPath, query: URLSearchParams, runtime: ApiRuntime): Promise<unknown> {
   return send('GET', path + (query.size ? '?' + query.toString() : ''), runtime);
 }
+/** Like `read`, but returns the raw response bytes instead of parsing JSON (used for attachment downloads). */
 export async function readBytes(path: ReadPath, query: URLSearchParams, runtime: ApiRuntime): Promise<Buffer> {
   return await send('GET', path + (query.size ? '?' + query.toString() : ''), runtime, undefined, true) as Buffer;
 }

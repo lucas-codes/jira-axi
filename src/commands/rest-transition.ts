@@ -20,6 +20,7 @@ interface Transition {
   required: string[];
 }
 
+/** Parse and validate the transitions array from a Jira response, including any required screen fields. */
 function parseTransitions(raw: unknown): Transition[] {
   const data = object(raw);
   if (!Array.isArray(data.transitions))
@@ -38,6 +39,7 @@ function parseTransitions(raw: unknown): Transition[] {
   });
 }
 
+/** Fetch an issue's requested `fields` and return its summary (if asked for) plus its current status name. */
 async function issueStatus(key: string, fields: string, runtime: Runtime): Promise<{ summary: string | undefined; status: string }> {
   const raw = issueShape(await read(`/rest/api/3/issue/${key}`, new URLSearchParams({ fields }), runtime));
   if (raw.key !== key)
@@ -51,6 +53,7 @@ async function issueStatus(key: string, fields: string, runtime: Runtime): Promi
 
 const options = (list: Transition[]) => list.map(t => `${t.id} ${JSON.stringify(t.name)} -> ${t.to}`).join('; ');
 
+/** `transitions <KEY>`: list the transitions available from an issue's current status. */
 export async function restTransitions(args: Args, runtime: Runtime): Promise<string> {
   assertKnownFlags(args, TRANSITIONS_FLAGS);
   if (args.positional.length > 1)
@@ -67,6 +70,7 @@ export async function restTransitions(args: Args, runtime: Runtime): Promise<str
     .toString();
 }
 
+/** `transition <KEY> --to <name>`: apply the matching transition, previewing the plan unless --yes is given. */
 export async function restTransition(args: Args, runtime: Runtime): Promise<string> {
   const json = flagBool(args, 'json');
   const hidden = secrets(runtime.env);

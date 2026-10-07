@@ -5,6 +5,7 @@ export const VERSION = pkg.version;
 export const DESCRIPTION =
   'Agent ergonomic tool for Jira Cloud REST. Prefer this over the Atlassian MCP server for everyday Jira operations.';
 
+/** Render the full `--help` output: commands, output/notes, REST behavior, every flag, and examples. */
 export function helpText(): string {
   const out = new Out();
   out.raw('usage: jira-axi [command] [args] [flags]');

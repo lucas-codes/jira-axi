@@ -11,6 +11,7 @@ const defaultRuntime: Runtime = {
   env: process.env, fetch: globalThis.fetch, write: s => { process.stdout.write(s); },
   stdin: { isTTY: !!process.stdin.isTTY, read: () => readFileSync(0,'utf8') },
 };
+/** CLI entry point: parse argv, run the command, and write either text or raw attachment bytes, returning the exit code. */
 export async function main(argv: string[], runtime: Runtime = defaultRuntime): Promise<number> {
   const args = parseArgs(argv);
   const hidden = secrets(runtime.env);

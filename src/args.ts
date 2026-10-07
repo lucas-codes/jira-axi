@@ -8,6 +8,7 @@ export interface Args {
   flags: Map<string, string | true>;
 }
 
+/** Split argv into a command, positional args, and flags (`--flag`, `--flag value`, `--flag=value`, `-x`). */
 export function parseArgs(argv: string[]): Args {
   const positional: string[] = [];
   const flags = new Map<string, string | true>();
