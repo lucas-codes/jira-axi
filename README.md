@@ -248,9 +248,10 @@ npm run build     # bun build --target=node -> dist/
 npm pack          # prepack rebuilds dist first
 ```
 
-Releases are automated. Use conventional commit messages (`feat:`, `fix:`,
-`docs:`); every push to `main` updates one open release PR with the next version
-and changelog. Merging that PR tags `vX.Y.Z`, creates the GitHub release and
+Releases are automated. PRs are squash-merged with the PR title as the commit
+message, so PR titles must be conventional (`feat:`, `fix:`, `docs:`); a
+required check enforces it. Every push to `main` updates one open release PR
+with the next version and changelog. Merging that PR tags `vX.Y.Z`, creates the GitHub release and
 publishes to npm through trusted publishing, with provenance.
 
 Tests never touch the network. Fixtures under `src/__tests__/fixtures/`
