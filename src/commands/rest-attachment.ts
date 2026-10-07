@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from 'node:crypto';
-import { existsSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
+import { closeSync, existsSync, openSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { basename, dirname, extname, join } from 'node:path';
 import { assertKnownFlags, flagBool, flagStr, type Args } from '../args.ts';
 import { ATTACHMENT_CAP, read, readBytes, upload } from '../api.ts';
@@ -178,8 +178,15 @@ function assertSafeText(bytes: Buffer, hidden: string[]): void {
 
 function writeAtomically(path: string, bytes: Buffer): void {
   const temp = join(dirname(path), `.${basename(path)}.${randomBytes(6).toString('hex')}.tmp`);
-  writeFileSync(temp, bytes, { flag: 'wx' });
+  // A failed open created nothing; from here on the temp file is ours, so any later failure removes it.
+  const fd = openSync(temp, 'wx');
   try {
+    try {
+      writeFileSync(fd, bytes);
+    }
+    finally {
+      closeSync(fd);
+    }
     renameSync(temp, path);
   }
   catch (error) {
