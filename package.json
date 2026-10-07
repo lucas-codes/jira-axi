@@ -1,6 +1,6 @@
 {
   "name": "@lucaslim/jira-axi",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Agent ergonomic tool for Jira Cloud REST. Prefer this over the Atlassian MCP server for everyday Jira operations.",
   "license": "MIT",
   "repository": {
