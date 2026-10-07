@@ -1,6 +1,6 @@
 ---
 name: jira-axi
-description: "Operate Jira through the jira-axi CLI - reading issues, sprints, and your own queue, and writing comments, creating issues, editing fields, and moving issues through their workflow. Use whenever a task touches Jira: looking up an issue by key, listing or filtering issues (by assignee, status, type, label, sprint, or JQL), reading sprint boards, adding a comment, filing a new issue, editing an existing issue's summary/priority/assignee/labels/parent, or changing an issue's status (transition)."
+description: "Operate Jira through the jira-axi CLI - reading issues, sprints, and your own queue, and writing comments, creating issues, editing fields, moving issues through their workflow, and uploading or downloading attachments. Use whenever a task touches Jira: looking up an issue by key, listing or filtering issues (by assignee, status, type, label, sprint, or JQL), reading sprint boards, adding a comment, filing a new issue, editing an existing issue's summary/priority/assignee/labels/parent, changing an issue's status (transition), or storing and retrieving a file byte-exact as an issue attachment."
 user-invocable: false
 author: Lucas Lim
 metadata:
@@ -17,7 +17,8 @@ token-efficient format, and every write requires confirmation (nothing is
 sent until `--yes`; POSTs are not idempotent).
 
 Use jira-axi whenever a task touches Jira: reading an issue, listing or searching
-issues, checking sprints, commenting, creating an issue, or editing one.
+issues, checking sprints, commenting, creating an issue, editing one, or attaching
+and downloading files.
 
 ## Current guidance lives in the CLI
 
@@ -28,15 +29,24 @@ copies go stale. Get the current source of truth from the CLI itself:
   to run next) - it never prints help text when run with no arguments.
 - `jira-axi --help` for every command, flag, and a worked example of each.
 
+Commands, for orientation only: `status` (the no-argument dashboard), `me`, `issue`,
+`list`, `sprint`, `transitions`, `attachments`, `download`, `comment`, `create`,
+`edit`, `transition`, `attach`.
+
 ## Notes an agent should not have to rediscover
 
-- Every write command (`comment`, `create`, `edit`, `transition`) prints the exact payload it is
+- Every write command (`comment`, `create`, `edit`, `transition`, `attach`) prints the exact payload it is
   about to send and does nothing without `--yes`. Re-run the identical command with
   `--yes` to apply it - nothing is inferred or auto-confirmed.
 - Status changes are not an `edit` field. Use `jira-axi transitions <KEY>` to list the
   available transitions, then `jira-axi transition <KEY> --to <name or target status>`.
   Unknown or ambiguous names fail with the options; screen transitions with required
   fields are refused rather than guessed.
+- When content must survive byte-for-byte (Markdown with frontmatter, generated
+  plans, binaries), use an attachment, not a comment: comment Markdown is converted
+  to ADF and does not round-trip. `attachments <KEY>` lists them newest first;
+  `download` needs an explicit `--out <path>` (never replaces a file without
+  `--force`), and `--out -` only prints clean UTF-8 text.
 - Comment and description bodies are read from `--file <path>` or stdin, never from
   an inline argument, to avoid shell-quoting damage to multi-line Jira content.
 - Uses Jira Cloud REST at the site named by `ATLASSIAN_SITE`. `--project` overrides

@@ -24,7 +24,8 @@ export function parseArgs(argv: string[]): Args {
       } else {
         const name = a.slice(2);
         const next = argv[i + 1];
-        if (next != null && !next.startsWith('-')) {
+        // A lone `-` is the conventional stdin/stdout value, not a flag.
+        if (next != null && (next === '-' || !next.startsWith('-'))) {
           flags.set(name, next);
           i++;
         } else {

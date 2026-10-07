@@ -14,21 +14,22 @@ const defaultRuntime: Runtime = {
 export async function main(argv: string[], runtime: Runtime = defaultRuntime): Promise<number> {
   const args = parseArgs(argv);
   const hidden = secrets(runtime.env);
-  let output = ''; let exitCode = 0;
+  let output = ''; let exitCode = 0; let bytes: Uint8Array | undefined;
   try {
     if (flagBool(args,'help','h') || args.command === 'help') output = helpText();
     else if (flagBool(args,'version','v','V')) output = `jira-axi ${VERSION}`;
     else {
       const name = args.command ?? 'status';
       if (/^[A-Za-z][A-Za-z0-9_]*-\d+$/.test(name)) { args.positional.unshift(name); args.command = 'issue'; }
-      output = await restCommand(args,runtime);
+      const result = await restCommand(args,runtime);
+      if (typeof result === 'string') output = result; else bytes = result;
     }
     assertNoSecrets(output,hidden);
     if (Buffer.byteLength(output) > 512*1024) throw new JiraError('Output exceeds 512 KiB; lower --limit','output_too_large');
   } catch (err) {
     const error = err instanceof JiraError ? err : new JiraError(err instanceof Error ? err.message : String(err),'UNKNOWN');
     exitCode = error.code === 'usage' ? 2 : 1;
-    if (['comment','create','edit','transition'].includes(args.command ?? '') && error.details.applied === undefined) error.details.applied = false;
+    if (['comment','create','edit','transition','attach'].includes(args.command ?? '') && error.details.applied === undefined) error.details.applied = false;
     const value = cleanModel({error:error.message,code:error.code,...error.details,...(error.hint ? {help:[error.hint]} : {})},hidden);
     if (flagBool(args,'json')) output = JSON.stringify(value,null,2);
     else {
@@ -42,6 +43,8 @@ export async function main(argv: string[], runtime: Runtime = defaultRuntime): P
       output = out.toString();
     }
   }
+  // A download already passed its own text and secret checks; a trailing newline would break byte-exactness.
+  if (bytes) { runtime.write(bytes); return exitCode; }
   try {
     assertNoSecrets(output,hidden);
     if (Buffer.byteLength(output) > 512*1024) throw new JiraError('Output exceeds 512 KiB','output_too_large');

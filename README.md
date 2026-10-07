@@ -6,10 +6,14 @@ token-efficient output for everyday Jira work without the Atlassian MCP server.
 ## Install
 
 ```sh
-npm install -g jira-axi     # or: volta install jira-axi
+npm install -g @lucaslim/jira-axi              # global CLI
+pnpm add -D --save-exact @lucaslim/jira-axi    # pinned per project
 ```
 
-Requires Node 22+. Calls Jira Cloud directly at the site you configure.
+The command is `jira-axi` either way. The unscoped `jira-axi` package on npm
+is unrelated. Requires Node 22+; the package ships a prebuilt bundle with no
+runtime dependencies or install scripts. Calls Jira Cloud directly at the site
+you configure.
 
 ## Setup
 
@@ -31,7 +35,34 @@ export JIRA_PROJECT=DEMO   # optional default project
 export JIRA_BOARD=42       # optional board id, needed for sprint/board output
 ```
 
-How you supply these values is up to you.
+How you supply these values is up to you, but keep the token out of
+dotfiles and shell history. Two common options follow.
+
+**A secret manager at run time.** With the 1Password CLI, put references (not
+values) in an env file and run commands through `op run`:
+
+```sh
+# ~/.config/jira-axi.env
+ATLASSIAN_SITE=your-site.atlassian.net
+ATLASSIAN_EMAIL=you@example.com
+ATLASSIAN_API_TOKEN=op://Private/Atlassian API token/credential
+```
+
+```sh
+op run --env-file="$HOME/.config/jira-axi.env" -- jira-axi me
+```
+
+**The macOS Keychain.** Store the token once (the trailing `-w` prompts for it
+rather than taking it as an argument), then read it from your shell profile:
+
+```sh
+security add-generic-password -a "$USER" -s jira-axi -w
+export ATLASSIAN_API_TOKEN="$(security find-generic-password -a "$USER" -s jira-axi -w)"
+```
+
+Run `jira-axi` with no arguments to check the result. It prints
+`auth: ok (<your account>)` when everything is set, or `auth: unavailable`
+with a pointer back to this section.
 
 - `ATLASSIAN_SITE` is required: `your-site.atlassian.net` or
   `https://your-site.atlassian.net`. Anything else (other hosts, `http`, paths,
@@ -78,8 +109,8 @@ Preview and apply carry the same unsanitized request bytes.
 
 ```
 usage: jira-axi [command] [args] [flags]
-commands[9]:
-  (none)=status, issue, list, sprint, transitions, comment, create, edit, transition, me
+commands[12]:
+  (none)=status, issue, list, sprint, transitions, comment, create, edit, transition, me, attachments, attach, download
 ```
 
 ### Reads
@@ -95,6 +126,7 @@ jira-axi list --jql "project = DEMO AND labels = infra"
 jira-axi list --sprint current
 jira-axi sprint
 jira-axi transitions DEMO-101       # id, name and target status of each available transition
+jira-axi attachments DEMO-101       # id, filename, size, created and author, newest first
 ```
 
 A bare issue key works too: `jira-axi DEMO-101`.
@@ -167,6 +199,37 @@ After applying, the issue is read back and its new status printed. Like every
 POST, an uncertain outcome reports `applied: unknown`; read the issue before
 retrying.
 
+### Attachments
+
+Attachments carry files byte-exact, which a comment cannot: comment Markdown is
+converted to ADF and back.
+
+```sh
+jira-axi attach DEMO-101 --file plan.md --name DEMO-101-scope-plan.md         # prints the plan, sends nothing
+jira-axi attach DEMO-101 --file plan.md --name DEMO-101-scope-plan.md --yes   # uploads it
+
+jira-axi download 10003 --out plan.md                                          # by attachment id
+jira-axi download DEMO-101 --name DEMO-101-scope-plan.md --out plan.md         # newest exact-name match
+jira-axi download DEMO-101 --name DEMO-101-scope-plan.md --out -               # raw bytes on stdout
+```
+
+- `attach` reads only `--file <path>` (no stdin) and uploads under the file's
+  basename unless `--name` overrides it. Names must be 1-255 bytes with no path
+  separators or terminal controls. Files are capped at 10 MiB and at the site's
+  own upload limit, and refused when attachments are disabled or the content
+  contains your credentials.
+- The preview prints the filename, size, `sha256`, MIME type and how many
+  attachments with that name already exist. `payloadDigest` covers the filename
+  and the content hash, and the upload is refused if the file changed after
+  planning. Like every POST, an uncertain outcome reports `applied: unknown`;
+  run `jira-axi attachments DEMO-101` before retrying.
+- `download` fetches the exact bytes, never rendered. Filename matching is exact
+  and case-sensitive; the newest match wins. A size different from the one Jira
+  reports fails with `size_mismatch` and writes nothing. `--out <path>` writes
+  atomically and refuses to replace an existing file unless `--force` is given.
+  `--out -` writes raw bytes to stdout only for UTF-8 text without terminal
+  controls; anything else must go to a file.
+
 ## Auth
 
 Credentials come only from `ATLASSIAN_EMAIL` plus `ATLASSIAN_API_TOKEN` in the
@@ -182,7 +245,14 @@ stable `code:` values such as `token_missing`, `unauthorized`, `not_found`, and
 npm run typecheck
 npm test          # node --test, recorded fixtures, no network
 npm run build     # bun build --target=node -> dist/
+npm pack          # prepack rebuilds dist first
 ```
+
+Releases are automated. PRs are squash-merged with the PR title as the commit
+message, so PR titles must be conventional (`feat:`, `fix:`, `docs:`); a
+required check enforces it. Every push to `main` updates one open release PR
+with the next version and changelog. Merging that PR tags `vX.Y.Z`, creates the GitHub release and
+publishes to npm through trusted publishing, with provenance.
 
 Tests never touch the network. Fixtures under `src/__tests__/fixtures/`
 include recorded responses and hand-built REST cases.
