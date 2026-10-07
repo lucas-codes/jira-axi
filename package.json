@@ -21,7 +21,6 @@
   "files": [
     "bin",
     "dist",
-    "skills/jira-axi",
     "README.md"
   ],
   "engines": {
