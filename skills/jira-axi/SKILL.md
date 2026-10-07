@@ -29,6 +29,10 @@ copies go stale. Get the current source of truth from the CLI itself:
   to run next) - it never prints help text when run with no arguments.
 - `jira-axi --help` for every command, flag, and a worked example of each.
 
+Commands, for orientation only: `status` (the no-argument dashboard), `me`, `issue`,
+`list`, `sprint`, `transitions`, `attachments`, `download`, `comment`, `create`,
+`edit`, `transition`, `attach`.
+
 ## Notes an agent should not have to rediscover
 
 - Every write command (`comment`, `create`, `edit`, `transition`, `attach`) prints the exact payload it is
