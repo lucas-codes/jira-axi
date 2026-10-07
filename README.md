@@ -6,10 +6,14 @@ token-efficient output for everyday Jira work without the Atlassian MCP server.
 ## Install
 
 ```sh
-npm install -g jira-axi     # or: volta install jira-axi
+npm install -g @lucaslim/jira-axi              # global CLI
+pnpm add -D --save-exact @lucaslim/jira-axi    # pinned per project
 ```
 
-Requires Node 22+. Calls Jira Cloud directly at the site you configure.
+The command is `jira-axi` either way. The unscoped `jira-axi` package on npm
+is unrelated. Requires Node 22+; the package ships a prebuilt bundle with no
+runtime dependencies or install scripts. Calls Jira Cloud directly at the site
+you configure.
 
 ## Setup
 
@@ -214,6 +218,7 @@ stable `code:` values such as `token_missing`, `unauthorized`, `not_found`, and
 npm run typecheck
 npm test          # node --test, recorded fixtures, no network
 npm run build     # bun build --target=node -> dist/
+npm pack          # prepack rebuilds dist first
 ```
 
 Tests never touch the network. Fixtures under `src/__tests__/fixtures/`
