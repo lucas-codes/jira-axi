@@ -23,10 +23,16 @@ export function helpText(): string {
   out.raw('  REST search is one page; responses cap at 5 MiB and stdout at 512 KiB (lower --limit). --full includes the newest 100 comments; kanban sprint commands return unsupported.');
   out.raw('  REST refuses terminal controls in outbound fields before planning (security, applied: false). Strip the named code points and re-run. Body newlines and tabs remain allowed; preview and apply carry identical request bytes.');
   out.raw('  Workflow: `transitions <KEY>` lists the available transitions (id, name, target status). `transition <KEY> --to <name>` matches a transition name or its target status, case-insensitively; unknown or ambiguous names fail listing the options, and a transition whose screen has required fields is refused (do it in Jira). After applying it reads back and prints the new status.');
-  out.raw('flags[19]:');
-  out.raw(
-    '  --json, --full, --comments [N], --max-chars <n>, --max-comment-chars <n>, --limit <n>, --project/-p <KEY>, --jql/-q <jql>, --assignee/-a <me|name>, --status/-s <s>, --to <name>, --type/-t <t>, --priority/-y <p>, --label/-l <l>, --sprint <current|prev|next|ID>, --yes, --confirm <digest>, --help, -v/--version',
-  );
+  const flags = [
+    '--json', '--full', '--comments [N]', '--max-chars <n>', '--max-comment-chars <n>', '--limit <n>',
+    '--project/-p <KEY>', '--jql/-q <jql>', '--assignee/-a <me|name>', '--mine', '--status/-s <s>',
+    '--summary/-s <text>', '--type/-t <t>', '--priority/-y <p>', '--label/-l <l>', '--parent/-P <KEY>',
+    '--component/-C <name>', '--file/-F <path|->', '--body-file <path|->', '--stdin', '--internal',
+    '--skip-notify', '--to <name>', '--sprint <current|prev|next|ID>', '--state <states>', '--updated <date>',
+    '--created <date>', '--watching', '--history', '--yes', '--confirm <digest>', '--help', '-v/--version',
+  ];
+  out.raw(`flags[${flags.length}]:`);
+  out.raw('  ' + flags.join(', '));
   out.raw('examples:');
   for (const e of [
     'jira-axi',
