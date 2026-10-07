@@ -2,18 +2,19 @@ import { createHash, randomBytes } from 'node:crypto';
 import { closeSync, existsSync, openSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { basename, dirname, extname, join } from 'node:path';
 import { assertKnownFlags, flagBool, flagStr, type Args } from '../args.ts';
-import { ATTACHMENT_CAP, read, readBytes, upload } from '../api.ts';
+import { ATTACHMENT_CAP, read, readBytes, remove, upload } from '../api.ts';
 import { Out } from '../format.ts';
 import { JiraError } from '../jira.ts';
 import { object, projectKey, type Runtime } from '../rest.ts';
 import { assertNoSecrets, assertOutboundText, cleanModel, secrets } from '../security.ts';
 import { siteOrigin } from '../site.ts';
-import { confirmWrite, payloadDigest, type PlannedUpload } from '../write-plan.ts';
+import { confirmWrite, payloadDigest, type PlannedDelete, type PlannedUpload } from '../write-plan.ts';
 import { issueShape, requireRestKey } from './rest-read.ts';
 
 export const ATTACHMENTS_FLAGS = ['json', 'project', 'p'];
 export const ATTACH_FLAGS = ['file', 'F', 'name', 'yes', 'confirm', 'json', 'project', 'p'];
 export const DOWNLOAD_FLAGS = ['name', 'out', 'force', 'json', 'project', 'p'];
+export const DETACH_FLAGS = ['yes', 'confirm', 'json'];
 
 const ID_RE = /^[1-9]\d{0,18}$/;
 const MIME: Record<string, string> = { '.md': 'text/markdown', '.txt': 'text/plain' };
@@ -246,4 +247,69 @@ export async function restDownload(args: Args, runtime: Runtime): Promise<string
   for (const [field, value] of Object.entries(summary))
     lines.kv(field, value as string | number);
   return lines.toString();
+}
+
+export async function restDetach(args: Args, runtime: Runtime): Promise<string> {
+  const json = flagBool(args, 'json');
+  const hidden = secrets(runtime.env);
+  assertKnownFlags(args, DETACH_FLAGS);
+  const id = args.positional[0];
+  if (args.positional.length !== 1 || !id || !ID_RE.test(id))
+    throw new JiraError('detach takes exactly one attachment id', 'usage', 'List ids with `jira-axi attachments <KEY>`.');
+  const readBack = `jira-axi detach ${id}`;
+  let attachment: Attachment;
+  try {
+    attachment = parseAttachment(await read(`/rest/api/3/attachment/${id}`, new URLSearchParams(), runtime));
+  }
+  catch (error) {
+    if (error instanceof JiraError && error.code === 'not_found')
+      throw new JiraError(`Attachment ${id} does not exist`, 'not_found', 'If an earlier detach of it reported applied: unknown, that delete succeeded. Nothing was sent.');
+    throw error;
+  }
+  const plan: PlannedDelete = { method: 'DELETE', path: `/rest/api/3/attachment/${id}`, query: {} };
+  const grant = confirmWrite(args, plan);
+  const summary = cleanModel({ action: 'delete-attachment', payloadDigest: payloadDigest(plan), id, filename: attachment.filename, size: attachment.size, mimeType: attachment.mimeType, created: attachment.created, ...(attachment.author ? { author: attachment.author } : {}) }, hidden);
+  if (!grant) {
+    const preview = { ...summary, applied: false, request: plan };
+    if (json)
+      return JSON.stringify(preview, null, 2);
+    const out = new Out();
+    for (const [field, value] of Object.entries(summary))
+      out.kv(field, value as string | number);
+    return out.text('request', JSON.stringify(plan, null, 2)).kv('applied', false)
+      .list('help', ['Nothing was sent to Jira. Re-run the identical command with --yes to delete it.'])
+      .toString();
+  }
+  try {
+    await remove(plan, grant, runtime);
+  }
+  catch (error) {
+    if (!(error instanceof JiraError))
+      throw error;
+    let replacement: JiraError | undefined;
+    if (error.details.applied === 'unknown')
+      replacement = new JiraError(error.message, error.code, `Read back before retrying: \`${readBack}\` previews without deleting; not_found there means the delete succeeded.`);
+    else if (error.code === 'forbidden')
+      replacement = new JiraError(`Not allowed to delete attachment ${id}`, 'forbidden', 'Deleting needs the "Delete own attachments" project permission, or "Delete all attachments" for files another user added.');
+    else if (error.code === 'not_found')
+      replacement = new JiraError(`Attachment ${id} was already deleted`, 'not_found');
+    if (!replacement)
+      throw error;
+    replacement.details = error.details;
+    throw replacement;
+  }
+  const applied = { ...summary, applied: true };
+  const out = new Out();
+  for (const [field, value] of Object.entries(applied))
+    out.kv(field, value as string | number | boolean);
+  const output = json ? JSON.stringify(applied, null, 2) : out.toString();
+  try {
+    assertNoSecrets(output, hidden);
+  }
+  catch {
+    const error = new JiraError('Delete applied, but output was refused', 'security', `Confirm with \`${readBack}\`: not_found means it is gone.`);
+    error.details.applied = true;
+    throw error;
+  }
+  return output;
 }

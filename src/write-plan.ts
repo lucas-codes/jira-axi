@@ -14,7 +14,12 @@ export interface PlannedUpload {
   query: Record<string, string>;
   upload: { filename: string; size: number; sha256: string; mimeType: string };
 }
-export type PlannedWrite = PlannedJsonWrite | PlannedUpload;
+export interface PlannedDelete {
+  method: 'DELETE';
+  path: string;
+  query: Record<string, string>;
+}
+export type PlannedWrite = PlannedJsonWrite | PlannedUpload | PlannedDelete;
 const granted: unique symbol = Symbol('write grant');
 export interface WriteGrant {
   readonly [granted]: PlannedWrite;

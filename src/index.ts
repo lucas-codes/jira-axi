@@ -29,7 +29,7 @@ export async function main(argv: string[], runtime: Runtime = defaultRuntime): P
   } catch (err) {
     const error = err instanceof JiraError ? err : new JiraError(err instanceof Error ? err.message : String(err),'UNKNOWN');
     exitCode = error.code === 'usage' ? 2 : 1;
-    if (['comment','create','edit','transition','attach'].includes(args.command ?? '') && error.details.applied === undefined) error.details.applied = false;
+    if (['comment','create','edit','transition','attach','detach'].includes(args.command ?? '') && error.details.applied === undefined) error.details.applied = false;
     const value = cleanModel({error:error.message,code:error.code,...error.details,...(error.hint ? {help:[error.hint]} : {})},hidden);
     if (flagBool(args,'json')) output = JSON.stringify(value,null,2);
     else {

@@ -3,7 +3,7 @@ import { JiraError } from './jira.ts';
 import { siteOrigin } from './site.ts';
 import { credentials, clean, secrets, assertNoSecrets, type Env } from './security.ts';
 import { createHash } from 'node:crypto';
-import { assertGrant, type PlannedJsonWrite, type PlannedUpload, type PlannedWrite, type WriteGrant } from './write-plan.ts';
+import { assertGrant, type PlannedDelete, type PlannedJsonWrite, type PlannedUpload, type PlannedWrite, type WriteGrant } from './write-plan.ts';
 export interface ApiRuntime {
   env: Env;
   fetch: typeof globalThis.fetch;
@@ -31,11 +31,12 @@ const routes: [
   ['POST', new RegExp(`^/rest/api/3/issue/${key}/transitions$`), []],
   ['POST', new RegExp(`^/rest/api/3/issue/${key}/attachments$`), []],
   ['PUT', new RegExp(`^/rest/api/3/issue/${key}$`), ['notifyUsers']],
+  ['DELETE', /^\/rest\/api\/3\/attachment\/[1-9]\d{0,18}$/, []],
 ];
 const isTransition = (path: string) => path.endsWith('/transitions');
 const isUpload = (path: string) => path.endsWith('/attachments');
-// Transitions and edits answer 204 with no body; attachment upload answers 200; every other POST creates with 201.
-const writeStatus = (method: string, path: string) => method === 'PUT' || isTransition(path) ? 204 : isUpload(path) ? 200 : 201;
+// Transitions, edits and deletes answer 204 with no body; attachment upload answers 200; every other POST creates with 201.
+const writeStatus = (method: string, path: string) => method === 'PUT' || method === 'DELETE' || isTransition(path) ? 204 : isUpload(path) ? 200 : 201;
 const JSON_CAP = 5 * 1024 * 1024;
 export const ATTACHMENT_CAP = 10 * 1024 * 1024;
 export function validateUrl(method: string, input: string, origin: string): URL {
@@ -190,7 +191,7 @@ async function apply(plan: PlannedWrite, grant: WriteGrant, runtime: ApiRuntime,
     validateUrl(plan.method, input, siteOrigin(runtime.env));
     credentials(runtime.env);
     assertNoSecrets(JSON.stringify(plan), secrets(runtime.env));
-    let payload: Payload;
+    let payload: Payload | undefined;
     if ('upload' in plan) {
       const { filename, size, sha256, mimeType } = plan.upload;
       if (!bytes || bytes.length !== size || createHash('sha256').update(bytes).digest('hex') !== sha256)
@@ -201,7 +202,7 @@ async function apply(plan: PlannedWrite, grant: WriteGrant, runtime: ApiRuntime,
       form.append('file', new Blob([bytes], { type: mimeType }), filename);
       payload = { form };
     }
-    else
+    else if ('body' in plan)
       payload = { json: plan.body };
     sending = true;
     const result = await send(plan.method, input, runtime, payload);
@@ -235,6 +236,9 @@ async function apply(plan: PlannedWrite, grant: WriteGrant, runtime: ApiRuntime,
   }
 }
 export function write(plan: PlannedJsonWrite, grant: WriteGrant, runtime: ApiRuntime): Promise<unknown | null> {
+  return apply(plan, grant, runtime);
+}
+export function remove(plan: PlannedDelete, grant: WriteGrant, runtime: ApiRuntime): Promise<unknown | null> {
   return apply(plan, grant, runtime);
 }
 export function upload(plan: PlannedUpload, grant: WriteGrant, bytes: Buffer, runtime: ApiRuntime): Promise<unknown> {

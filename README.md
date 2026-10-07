@@ -109,8 +109,8 @@ Preview and apply carry the same unsanitized request bytes.
 
 ```
 usage: jira-axi [command] [args] [flags]
-commands[12]:
-  (none)=status, issue, list, sprint, transitions, comment, create, edit, transition, me, attachments, attach, download
+commands[13]:
+  (none)=status, issue, list, sprint, transitions, comment, create, edit, transition, me, attachments, attach, download, detach
 ```
 
 ### Reads
@@ -211,6 +211,9 @@ jira-axi attach DEMO-101 --file plan.md --name DEMO-101-scope-plan.md --yes   # 
 jira-axi download 10003 --out plan.md                                          # by attachment id
 jira-axi download DEMO-101 --name DEMO-101-scope-plan.md --out plan.md         # newest exact-name match
 jira-axi download DEMO-101 --name DEMO-101-scope-plan.md --out -               # raw bytes on stdout
+
+jira-axi detach 10003                                                          # prints what it would delete
+jira-axi detach 10003 --yes                                                    # deletes it
 ```
 
 - `attach` reads only `--file <path>` (no stdin) and uploads under the file's
@@ -229,6 +232,12 @@ jira-axi download DEMO-101 --name DEMO-101-scope-plan.md --out -               #
   atomically and refuses to replace an existing file unless `--force` is given.
   `--out -` writes raw bytes to stdout only for UTF-8 text without terminal
   controls; anything else must go to a file.
+- `detach <ID>` deletes one attachment. The preview shows its filename, size,
+  author and created time so you can check it is the right file. `not_found`
+  means it is already gone; after a delete that reported `applied: unknown`,
+  that is how you know it succeeded (re-run `detach <ID>` without `--yes` to
+  check). `forbidden` means you lack the "Delete own attachments" project
+  permission, or "Delete all attachments" for a file another user added.
 
 ## Auth
 
