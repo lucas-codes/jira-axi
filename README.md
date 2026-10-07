@@ -35,7 +35,34 @@ export JIRA_PROJECT=DEMO   # optional default project
 export JIRA_BOARD=42       # optional board id, needed for sprint/board output
 ```
 
-How you supply these values is up to you.
+How you supply these values is up to you, but keep the token out of
+dotfiles and shell history. Two common options follow.
+
+**A secret manager at run time.** With the 1Password CLI, put references (not
+values) in an env file and run commands through `op run`:
+
+```sh
+# ~/.config/jira-axi.env
+ATLASSIAN_SITE=your-site.atlassian.net
+ATLASSIAN_EMAIL=you@example.com
+ATLASSIAN_API_TOKEN=op://Private/Atlassian API token/credential
+```
+
+```sh
+op run --env-file="$HOME/.config/jira-axi.env" -- jira-axi me
+```
+
+**The macOS Keychain.** Store the token once (the trailing `-w` prompts for it
+rather than taking it as an argument), then read it from your shell profile:
+
+```sh
+security add-generic-password -a "$USER" -s jira-axi -w
+export ATLASSIAN_API_TOKEN="$(security find-generic-password -a "$USER" -s jira-axi -w)"
+```
+
+Run `jira-axi` with no arguments to check the result. It prints
+`auth: ok (<your account>)` when everything is set, or `auth: unavailable`
+with a pointer back to this section.
 
 - `ATLASSIAN_SITE` is required: `your-site.atlassian.net` or
   `https://your-site.atlassian.net`. Anything else (other hosts, `http`, paths,
