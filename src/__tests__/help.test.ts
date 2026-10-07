@@ -4,7 +4,7 @@ import { helpText } from '../help.ts';
 import { COMMENT_FLAGS, CREATE_FLAGS, EDIT_FLAGS } from '../commands/rest-write.ts';
 import { ISSUE_FLAGS, LIST_FLAGS, SPRINT_FLAGS } from '../commands/rest-read.ts';
 import { TRANSITION_FLAGS, TRANSITIONS_FLAGS } from '../commands/rest-transition.ts';
-import { ATTACH_FLAGS, ATTACHMENTS_FLAGS, DOWNLOAD_FLAGS } from '../commands/rest-attachment.ts';
+import { ATTACH_FLAGS, ATTACHMENTS_FLAGS, DETACH_FLAGS, DOWNLOAD_FLAGS } from '../commands/rest-attachment.ts';
 
 test('help lists every flag spelling accepted by a command and reports the exact count', () => {
   const help = helpText();
@@ -16,7 +16,7 @@ test('help lists every flag spelling accepted by a command and reports the exact
   for (const flag of new Set([
     ...ISSUE_FLAGS, ...LIST_FLAGS, ...SPRINT_FLAGS, ...COMMENT_FLAGS,
     ...CREATE_FLAGS, ...EDIT_FLAGS, ...TRANSITIONS_FLAGS, ...TRANSITION_FLAGS,
-    ...ATTACHMENTS_FLAGS, ...ATTACH_FLAGS, ...DOWNLOAD_FLAGS,
+    ...ATTACHMENTS_FLAGS, ...ATTACH_FLAGS, ...DOWNLOAD_FLAGS, ...DETACH_FLAGS,
   ])) {
     const spelling = flag.length === 1 ? `-${flag}` : `--${flag}`;
     assert.ok(spellings.has(spelling), `help is missing ${spelling}`);

@@ -1,6 +1,6 @@
 ---
 name: jira-axi
-description: "Operate Jira through the jira-axi CLI - reading issues, sprints, and your own queue, and writing comments, creating issues, editing fields, moving issues through their workflow, and uploading or downloading attachments. Use whenever a task touches Jira: looking up an issue by key, listing or filtering issues (by assignee, status, type, label, sprint, or JQL), reading sprint boards, adding a comment, filing a new issue, editing an existing issue's summary/priority/assignee/labels/parent, changing an issue's status (transition), or storing and retrieving a file byte-exact as an issue attachment."
+description: "Operate Jira through the jira-axi CLI - reading issues, sprints, and your own queue, and writing comments, creating issues, editing fields, moving issues through their workflow, and uploading, downloading or deleting attachments. Use whenever a task touches Jira: looking up an issue by key, listing or filtering issues (by assignee, status, type, label, sprint, or JQL), reading sprint boards, adding a comment, filing a new issue, editing an existing issue's summary/priority/assignee/labels/parent, changing an issue's status (transition), or storing and retrieving a file byte-exact as an issue attachment."
 user-invocable: false
 author: Lucas Lim
 metadata:
@@ -31,11 +31,11 @@ copies go stale. Get the current source of truth from the CLI itself:
 
 Commands, for orientation only: `status` (the no-argument dashboard), `me`, `issue`,
 `list`, `sprint`, `transitions`, `attachments`, `download`, `comment`, `create`,
-`edit`, `transition`, `attach`.
+`edit`, `transition`, `attach`, `detach`.
 
 ## Notes an agent should not have to rediscover
 
-- Every write command (`comment`, `create`, `edit`, `transition`, `attach`) prints the exact payload it is
+- Every write command (`comment`, `create`, `edit`, `transition`, `attach`, `detach`) prints the exact payload it is
   about to send and does nothing without `--yes`. Re-run the identical command with
   `--yes` to apply it - nothing is inferred or auto-confirmed.
 - Status changes are not an `edit` field. Use `jira-axi transitions <KEY>` to list the
@@ -46,7 +46,8 @@ Commands, for orientation only: `status` (the no-argument dashboard), `me`, `iss
   plans, binaries), use an attachment, not a comment: comment Markdown is converted
   to ADF and does not round-trip. `attachments <KEY>` lists them newest first;
   `download` needs an explicit `--out <path>` (never replaces a file without
-  `--force`), and `--out -` only prints clean UTF-8 text.
+  `--force`), and `--out -` only prints clean UTF-8 text. `detach <ID>` deletes
+  one attachment; `not_found` from it means the file is already gone.
 - Comment and description bodies are read from `--file <path>` or stdin, never from
   an inline argument, to avoid shell-quoting damage to multi-line Jira content.
 - Uses Jira Cloud REST at the site named by `ATLASSIAN_SITE`. `--project` overrides
