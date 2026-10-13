@@ -126,7 +126,7 @@ jira-axi list --jql "project = DEMO AND labels = infra"
 jira-axi list --sprint current
 jira-axi sprint
 jira-axi transitions DEMO-101       # id, name and target status of each available transition
-jira-axi attachments DEMO-101       # id, filename, size, created and author, newest first
+jira-axi attachments DEMO-101       # id, filename, size, created, author and optional authorAccountId, newest first
 ```
 
 A bare issue key works too: `jira-axi DEMO-101`.
@@ -204,6 +204,12 @@ retrying.
 Attachments carry files byte-exact, which a comment cannot: comment Markdown is
 converted to ADF and back.
 
+`author` remains the uploader's `displayName`; optional `authorAccountId` is
+that Jira uploader's stable identifier. Use the account ID, not the display
+name, for ownership checks; do not infer ownership when the ID is missing.
+`attachments` compact output appends `authorAccountId` after `author`, using
+`-` when unavailable; JSON omits the unavailable property.
+
 ```sh
 jira-axi attach DEMO-101 --file plan.md --name DEMO-101-scope-plan.md         # prints the plan, sends nothing
 jira-axi attach DEMO-101 --file plan.md --name DEMO-101-scope-plan.md --yes   # uploads it
@@ -225,7 +231,9 @@ jira-axi detach 10003 --yes                                                    #
   attachments with that name already exist. `payloadDigest` covers the filename
   and the content hash, and the upload is refused if the file changed after
   planning. Like every POST, an uncertain outcome reports `applied: unknown`;
-  run `jira-axi attachments DEMO-101` before retrying.
+  run `jira-axi attachments DEMO-101` before retrying. Successful `attach`
+  output includes `authorAccountId` in both compact and JSON output when the
+  upload response provides it; it is absent in previews.
 - `download` fetches the exact bytes, never rendered. Filename matching is exact
   and case-sensitive; the newest match wins. A size different from the one Jira
   reports fails with `size_mismatch` and writes nothing. `--out <path>` writes

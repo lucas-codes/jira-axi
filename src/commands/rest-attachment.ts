@@ -26,6 +26,7 @@ interface Attachment {
   mimeType: string;
   created: string;
   author: string | undefined;
+  authorAccountId?: string;
 }
 
 // Jira documents id as both string and number and created as both ISO text and epoch millis; accept both, emit one form.
@@ -35,8 +36,8 @@ function parseAttachment(raw: unknown): Attachment {
   const created = typeof a.created === 'number' || typeof a.created === 'string' ? new Date(a.created) : undefined;
   if (typeof id !== 'string' || !ID_RE.test(id) || typeof a.filename !== 'string' || !a.filename || !Number.isSafeInteger(a.size) || (a.size as number) < 0 || (a.mimeType != null && typeof a.mimeType !== 'string') || !created || Number.isNaN(created.getTime()))
     throw new JiraError('Malformed attachment', 'bad_response');
-  const author = a.author == null ? undefined : object(a.author).displayName;
-  return { id, filename: a.filename, size: a.size as number, mimeType: (a.mimeType as string | undefined) ?? '', created: created.toISOString(), author: typeof author === 'string' ? author : undefined };
+  const author = a.author == null ? undefined : object(a.author);
+  return { id, filename: a.filename, size: a.size as number, mimeType: (a.mimeType as string | undefined) ?? '', created: created.toISOString(), author: typeof author?.displayName === 'string' ? author.displayName : undefined, ...(typeof author?.accountId === 'string' ? { authorAccountId: author.accountId } : {}) };
 }
 
 async function issueAttachments(key: string, fields: string, runtime: Runtime): Promise<{ summary: string | undefined; list: Attachment[] }> {
@@ -67,7 +68,7 @@ export async function restAttachments(args: Args, runtime: Runtime): Promise<str
     return JSON.stringify({ issue: key, count: rows.length, attachments: rows }, null, 2);
   return new Out()
     .kv('issue', key)
-    .table('attachments', ['id', 'filename', 'size', 'mimeType', 'created', 'author'], rows.map(a => [a.id, a.filename, a.size, a.mimeType, a.created, a.author ?? '-']))
+    .table('attachments', ['id', 'filename', 'size', 'mimeType', 'created', 'author', 'authorAccountId'], rows.map(a => [a.id, a.filename, a.size, a.mimeType, a.created, a.author ?? '-', a.authorAccountId ?? '-']))
     .list('help', [`Run \`jira-axi download ${key} --name <filename> --out <path>\` for the newest file with that name`])
     .toString();
 }
@@ -148,7 +149,7 @@ export async function restAttach(args: Args, runtime: Runtime): Promise<string> 
   }
   if (stored.size !== bytes.length)
     throw acknowledged(new JiraError(`Jira stored ${stored.size} bytes but ${bytes.length} were sent`, 'attachment_mismatch', `Inspect it with ${readBack}`));
-  const applied = cleanModel({ action: 'attach-file', applied: true, payloadDigest: payloadDigest(plan), issue: key, attachmentId: stored.id, filename: stored.filename, size: stored.size, sha256, url: `${siteOrigin(runtime.env)}/browse/${key}` }, hidden);
+  const applied = cleanModel({ action: 'attach-file', applied: true, payloadDigest: payloadDigest(plan), issue: key, attachmentId: stored.id, filename: stored.filename, size: stored.size, ...(stored.authorAccountId !== undefined ? { authorAccountId: stored.authorAccountId } : {}), sha256, url: `${siteOrigin(runtime.env)}/browse/${key}` }, hidden);
   const out = new Out();
   for (const [field, value] of Object.entries(applied))
     out.kv(field, value as string | boolean | number);

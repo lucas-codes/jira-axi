@@ -48,6 +48,13 @@ Commands, for orientation only: `status` (the no-argument dashboard), `me`, `iss
   `download` needs an explicit `--out <path>` (never replaces a file without
   `--force`), and `--out -` only prints clean UTF-8 text. `detach <ID>` deletes
   one attachment; `not_found` from it means the file is already gone.
+  `author` remains the uploader's `displayName`; optional `authorAccountId` is
+  that Jira uploader's stable identifier. Use the account ID, not the display
+  name, for ownership checks; do not infer ownership when the ID is missing.
+  Compact listings append `authorAccountId` after `author`, using `-` when
+  unavailable; JSON omits the unavailable property. Successful `attach` output
+  includes it in compact and JSON when the upload response provides it; previews
+  omit it.
 - Comment and description bodies are read from `--file <path>` or stdin, never from
   an inline argument, to avoid shell-quoting damage to multi-line Jira content.
 - Uses Jira Cloud REST at the site named by `ATLASSIAN_SITE`. `--project` overrides

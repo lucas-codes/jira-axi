@@ -78,13 +78,76 @@ test('attachments lists newest first and normalizes id and created forms', async
   assert.equal(r.value.attachments[2].created, '2026-01-01T10:00:00.000Z');
   assert.equal(r.value.count, 3);
   const compact = await run(['attachments', 'DEMO-1'], {}, false);
-  assert.match(compact.output, /^attachments\[3\]\{id,filename,size,mimeType,created,author\}:$/m);
+  assert.match(compact.output, /^attachments\[3\]\{id,filename,size,mimeType,created,author,authorAccountId\}:$/m);
   const empty = await run(['attachments', 'DEMO-1'], { issue: { key: 'DEMO-1', fields: {} } });
   assert.equal(empty.value.count, 0);
   for (const bad of [[{ id: 'x', filename: 'a', size: 1, created: '2026-01-01T00:00:00.000Z' }], [{ id: '1', filename: '', size: 1, created: '2026-01-01T00:00:00.000Z' }], [{ id: '1', filename: 'a', size: -1, created: '2026-01-01T00:00:00.000Z' }], [{ id: '1', filename: 'a', size: 1, created: 'yesterday' }], 'x'])
     assert.equal((await run(['attachments', 'DEMO-1'], { issue: { key: 'DEMO-1', fields: { attachment: bad } } })).value.code, 'bad_response', JSON.stringify(bad));
   assert.equal((await run(['attachments', 'DEMO-1', '--file', 'x'])).exit, 2);
 });
+
+test('attachments exposes account ids independently of display names in JSON and compact cells', async () => {
+  const list = [
+    { ...attachments[0], id: '1', author: { displayName: 'Reader', accountId: 'account-one' } },
+    { ...attachments[0], id: '2', author: { displayName: 'Reader', accountId: 'account-two' } },
+    { ...attachments[0], id: '3', author: { displayName: 'Reader' } },
+    { ...attachments[0], id: '4', author: undefined },
+    { ...attachments[0], id: '5', author: { accountId: 'account-only' } },
+    { ...attachments[0], id: '6', author: { displayName: 'Reader', accountId: 123 } },
+  ];
+  const scenario = { issue: { key: 'DEMO-1', fields: { attachment: list } } };
+  const r = await run(['attachments', 'DEMO-1'], scenario);
+  assert.equal(r.exit, 0, r.output);
+  assert.deepEqual(r.value.attachments.map((a: Record<string, unknown>) => [a.id, a.author, a.authorAccountId]), [
+    ['6', 'Reader', undefined], ['5', undefined, 'account-only'], ['4', undefined, undefined],
+    ['3', 'Reader', undefined], ['2', 'Reader', 'account-two'], ['1', 'Reader', 'account-one'],
+  ]);
+  for (const a of r.value.attachments) {
+    if (['3', '4', '6'].includes(a.id))
+      assert.equal(Object.hasOwn(a, 'authorAccountId'), false);
+    if (['4', '5'].includes(a.id))
+      assert.equal(Object.hasOwn(a, 'author'), false);
+  }
+  const compact = await run(['attachments', 'DEMO-1'], scenario, false);
+  assert.equal(compact.exit, 0, compact.output);
+  assert.match(compact.output, /^attachments\[6\]\{id,filename,size,mimeType,created,author,authorAccountId\}:$/m);
+  const cells = compact.output.split('\n').filter(line => /^\s+"[1-6]",/.test(line)).map(line => line.trim().split(',').map(cell => cell.startsWith('"') ? JSON.parse(cell) : cell));
+  assert.deepEqual(cells, [
+    ['6', 'DEMO-1-scope-plan.md', '10', 'text/markdown', '2026-01-01T10:00:00.000Z', 'Reader', '-'],
+    ['5', 'DEMO-1-scope-plan.md', '10', 'text/markdown', '2026-01-01T10:00:00.000Z', '-', 'account-only'],
+    ['4', 'DEMO-1-scope-plan.md', '10', 'text/markdown', '2026-01-01T10:00:00.000Z', '-', '-'],
+    ['3', 'DEMO-1-scope-plan.md', '10', 'text/markdown', '2026-01-01T10:00:00.000Z', 'Reader', '-'],
+    ['2', 'DEMO-1-scope-plan.md', '10', 'text/markdown', '2026-01-01T10:00:00.000Z', 'Reader', 'account-two'],
+    ['1', 'DEMO-1-scope-plan.md', '10', 'text/markdown', '2026-01-01T10:00:00.000Z', 'Reader', 'account-one'],
+  ]);
+});
+
+for (const [label, author, accountId] of [
+  ['present', { displayName: 'Reader', accountId: 'account-one' }, 'account-one'],
+  ['without displayName', { accountId: 'account-only' }, 'account-only'],
+  ['missing accountId', { displayName: 'Reader' }, undefined],
+  ['missing author', undefined, undefined],
+] as const) {
+  test(`successful attach authorship ${label} is optional in JSON and compact output`, async () => {
+    const file = join(tmp(), 'a.md');
+    writeFileSync(file, plan);
+    const args = ['attach', 'DEMO-1', '--file', file, '--yes'];
+    const scenario = { post: { status: 200, body: [{ id: '7', filename: 'a.md', size: Buffer.byteLength(plan), created: '2026-01-01T00:00:00.000Z', ...(author ? { author } : {}) }] } };
+    const r = await run(args, scenario);
+    assert.equal(r.exit, 0, r.output);
+    assert.equal(r.value.applied, true);
+    assert.equal(r.value.authorAccountId, accountId);
+    assert.equal(Object.hasOwn(r.value, 'authorAccountId'), accountId !== undefined);
+    assert.equal(Object.hasOwn(r.value, 'author'), false);
+    const compact = await run(args, scenario, false);
+    assert.equal(compact.exit, 0, compact.output);
+    if (accountId !== undefined)
+      assert.match(compact.output, new RegExp(`^authorAccountId: ${accountId}$`, 'm'));
+    else
+      assert.doesNotMatch(compact.output, /^authorAccountId:/m);
+    assert.doesNotMatch(compact.output, /^author:/m);
+  });
+}
 
 test('attach previews with GETs only, then applies one multipart POST of the exact bytes', async () => {
   const dir = tmp();
