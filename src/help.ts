@@ -8,15 +8,15 @@ export const DESCRIPTION =
 export function helpText(): string {
   const out = new Out();
   out.raw('usage: jira-axi [command] [args] [flags]');
-  out.raw('commands[13]:');
-  out.raw('  (none)=status, issue, list, sprint, transitions, comment, create, edit, transition, me, attachments, attach, download, detach');
+  out.raw('commands[16]:');
+  out.raw('  (none)=status, issue, list, sprint, transitions, comment, create, edit, transition, me, attachments, attach, download, detach, link, unlink');
   out.raw('output:');
   out.raw(
     '  Compact by default: key: value headers plus name[N]{cols}: table blocks. Descriptions truncate at 2000 chars and comments at 600; --full removes text limits and includes the newest 100 comments. --json on any command returns the normalized structure.',
   );
   out.raw('notes:');
   out.raw(
-    '  Reads are free-running. Every write (comment, create, edit, transition, attach, detach) prints its exact payload and does nothing without --yes. Comment and description bodies are read from --file or stdin, never inline, to avoid shell quoting damage.',
+    '  Reads are free-running. Every write (comment, create, edit, transition, attach, detach, link, unlink) prints its exact payload and does nothing without --yes. Comment and description bodies are read from --file or stdin, never inline, to avoid shell quoting damage.',
   );
   out.raw('rest:');
   out.raw('  Uses Jira Cloud REST at the site named by ATLASSIAN_SITE. --project/-p overrides JIRA_PROJECT; sprint commands and board output need JIRA_BOARD.');
@@ -25,6 +25,7 @@ export function helpText(): string {
   out.raw('  REST refuses terminal controls in outbound fields before planning (security, applied: false). Strip the named code points and re-run. Body newlines and tabs remain allowed; preview and apply carry identical request bytes.');
   out.raw('  Workflow: `transitions <KEY>` lists the available transitions (id, name, target status). `transition <KEY> --to <name>` matches a transition name or its target status, case-insensitively; unknown or ambiguous names fail listing the options, and a transition whose screen has required fields is refused (do it in Jira). After applying it reads back and prints the new status.');
   out.raw('  Attachments: `attachments <KEY>` lists id, filename, size and created, newest first. `attach <KEY> --file <path> [--name <filename>]` uploads one file byte-exact (10 MiB cap and the site limit); payloadDigest covers the filename and the file\'s sha256, and changed bytes after preview are refused. `download <ID> --out <path|->` or `download <KEY> --name <filename> --out <path|->` fetches the exact bytes of one attachment (newest exact-name match); a file is written atomically and never replaced without --force, and --out - prints raw bytes only for clean UTF-8 text. `detach <ID>` deletes one attachment; its preview shows filename, size, author and created. not_found means it is already gone (an earlier applied: unknown delete succeeded); forbidden means the Delete own (or all) attachments permission is missing.');
+  out.raw('  Links: `link <A> <B> --type <name or phrase>` reads as A <phrase> B. A name or outward phrase uses A as the subject; an inward phrase reverses direction. Names and phrases match exactly, case-insensitively. Previews show both sentences and the exact request; existing links in that direction return existing: true without a POST. `issue <KEY>` lists link ids, type names, relation phrases, keys, statuses and summaries. `unlink <LINK-ID>` previews or deletes one link; not_found means it is already gone.');
   const flags = [
     '--json', '--full', '--comments [N]', '--max-chars <n>', '--max-comment-chars <n>', '--limit <n>',
     '--project/-p <KEY>', '--jql/-q <jql>', '--assignee/-a <me|name>', '--mine', '--status/-s <s>',
@@ -55,6 +56,10 @@ export function helpText(): string {
     'jira-axi attach DEMO-101 --file plan.md --name DEMO-101-scope-plan.md --yes',
     'jira-axi download DEMO-101 --name DEMO-101-scope-plan.md --out plan.md',
     'jira-axi detach 10003 --yes',
+    'jira-axi link DEMO-101 DEMO-102 --type Blocks',
+    'jira-axi link DEMO-101 DEMO-102 --type "is blocked by" --yes',
+    'jira-axi link DEMO-101 DEMO-103 --type Relates --yes',
+    'jira-axi unlink 10004 --yes',
     'jira-axi me',
   ]) {
     out.raw('  ' + e);

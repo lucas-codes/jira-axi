@@ -11,6 +11,7 @@
  */
 
 import { adfToText } from './adf.ts';
+import { JiraError } from './jira.ts';
 
 export interface Person {
   name: string;
@@ -25,7 +26,24 @@ export interface Comment {
   body: string;
 }
 
+export interface LinkType {
+  id: string;
+  name: string;
+  inward: string;
+  outward: string;
+}
+
 export interface IssueLink {
+  id: string;
+  type: string;
+  key: string;
+  summary?: string;
+  status?: string;
+  linkType: LinkType;
+  direction: 'outward' | 'inward';
+}
+
+export interface Subtask {
   type: string;
   key: string;
   summary?: string;
@@ -56,7 +74,7 @@ export interface Issue {
   description: string;
   comments: Comment[];
   commentTotal: number;
-  subtasks: IssueLink[];
+  subtasks: Subtask[];
   links: IssueLink[];
   url?: string;
 }
@@ -149,33 +167,49 @@ function parseComments(v: unknown): { comments: Comment[]; total: number } {
   return { comments, total };
 }
 
-function parseLinks(v: unknown): IssueLink[] {
-  if (!Array.isArray(v)) return [];
-  const out: IssueLink[] = [];
-  for (const raw of v) {
-    const l = rec(raw);
-    if (!l) continue;
-    const t = rec(l['type']);
-    const inward = rec(l['inwardIssue']);
-    const outward = rec(l['outwardIssue']);
-    const other = inward ?? outward;
-    if (!other) continue;
-    const relation =
-      (inward ? str(t?.['inward']) : str(t?.['outward'])) ?? named(l['type']) ?? 'relates to';
-    const of = rec(other['fields']);
-    out.push({
-      type: relation,
-      key: str(other['key']) ?? '?',
-      summary: str(of?.['summary']),
-      status: named(of?.['status']),
-    });
-  }
-  return out;
+function linkTypeOf(value: unknown): LinkType | undefined {
+  const t = rec(value);
+  if (!t || !['id', 'name', 'inward', 'outward'].every(k => typeof t[k] === 'string' && t[k]))
+    return undefined;
+  return { id: t.id as string, name: t.name as string, inward: t.inward as string, outward: t.outward as string };
 }
 
-function parseSubtasks(v: unknown): IssueLink[] {
+export function parseLinkType(value: unknown): LinkType {
+  const type = linkTypeOf(value);
+  if (!type)
+    throw new JiraError('Malformed link type', 'bad_response');
+  return type;
+}
+
+function issueLinkOf(raw: unknown): IssueLink | undefined {
+  const l = rec(raw);
+  const inward = rec(l?.inwardIssue);
+  const outward = rec(l?.outwardIssue);
+  const other = outward ?? inward;
+  const linkType = linkTypeOf(l?.type);
+  const status = rec(rec(other?.fields)?.status)?.name;
+  if (!l || !linkType || typeof l.id !== 'string' || !/^[1-9]\d{0,18}$/.test(l.id) || !other || !!inward === !!outward || typeof other.key !== 'string' || !/^[A-Z][A-Z0-9_]*-\d+$/.test(other.key) || (status != null && typeof status !== 'string'))
+    return undefined;
+  const direction = outward ? 'outward' : 'inward';
+  return { id: l.id, type: linkType[direction], key: other.key, summary: str(rec(other.fields)?.summary), status: status as string | undefined, linkType, direction };
+}
+
+/** Strict: link and unlink decide writes from this, so a record it cannot read must stop them. */
+export function parseIssueLinks(value: unknown): IssueLink[] {
+  if (value == null) return [];
+  if (!Array.isArray(value))
+    throw new JiraError('Malformed issue links', 'bad_response');
+  return value.map(raw => {
+    const link = issueLinkOf(raw);
+    if (!link)
+      throw new JiraError('Malformed issue link', 'bad_response');
+    return link;
+  });
+}
+
+function parseSubtasks(v: unknown): Subtask[] {
   if (!Array.isArray(v)) return [];
-  const out: IssueLink[] = [];
+  const out: Subtask[] = [];
   for (const raw of v) {
     const s = rec(raw);
     if (!s) continue;
@@ -241,7 +275,7 @@ export function parseIssue(input: unknown, opts: ParseOptions = {}): Issue {
     comments,
     commentTotal: total,
     subtasks: parseSubtasks(pick(f, 'subtasks', 'Subtasks')),
-    links: parseLinks(pick(f, 'issuelinks', 'issueLinks')),
+    links: [pick(f, 'issuelinks', 'issueLinks')].flat().flatMap(raw => issueLinkOf(raw) ?? []),
     url: opts.baseUrl ? `${opts.baseUrl.replace(/\/$/, '')}/browse/${key}` : undefined,
   };
 }

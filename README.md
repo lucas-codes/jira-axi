@@ -109,8 +109,8 @@ Preview and apply carry the same unsanitized request bytes.
 
 ```
 usage: jira-axi [command] [args] [flags]
-commands[13]:
-  (none)=status, issue, list, sprint, transitions, comment, create, edit, transition, me, attachments, attach, download, detach
+commands[16]:
+  (none)=status, issue, list, sprint, transitions, comment, create, edit, transition, me, attachments, attach, download, detach, link, unlink
 ```
 
 ### Reads
@@ -246,6 +246,45 @@ jira-axi detach 10003 --yes                                                    #
   that is how you know it succeeded (re-run `detach <ID>` without `--yes` to
   check). `forbidden` means you lack the "Delete own attachments" project
   permission, or "Delete all attachments" for a file another user added.
+
+### Links
+
+`issue <KEY>` shows existing links with id, type name, relation phrase, other
+issue key, status and summary. JSON keeps the flat `type` (relation phrase),
+`key`, `summary` and `status` fields, adding `id`, `linkType` (id, name, inward
+and outward phrases) and `direction`. An empty table is omitted; JSON keeps an
+empty array.
+
+```sh
+jira-axi link DEMO-101 DEMO-102 --type Blocks
+jira-axi link DEMO-101 DEMO-102 --type Blocks --yes
+jira-axi link DEMO-101 DEMO-102 --type "is blocked by" --yes
+jira-axi link DEMO-101 DEMO-103 --type Relates --yes
+jira-axi unlink 10004
+jira-axi unlink 10004 --yes
+```
+
+`link A B --type <name or phrase>` reads as a sentence. `Blocks` means A blocks B;
+`is blocked by` means B blocks A. Names, inward phrases and outward phrases match
+exactly, case-insensitively. Unknown or ambiguous types fail with the available
+names and phrases. A link to the same issue is refused.
+
+The preview shows both direction sentences, `payloadDigest` and the exact
+request. The request uses the type id so renamed types keep their identity.
+Before planning, the command checks A's links. An existing link of the same type
+and direction returns `existing: true` and `linkId` without a POST, even with
+`--yes`. Symmetric types such as Relates match either direction; the opposite
+direction of Blocks remains a different link.
+
+After a successful POST, the command reads A back and reports `linkId` and its
+browse URL. An uncertain outcome reports `applied: unknown`; read A before
+retrying. A read-back failure after Jira acknowledges the POST reports
+`applied: true`.
+
+`unlink <LINK-ID>` previews the type, keys and both sentences, then deletes only
+with `--yes`. Optional `--confirm <digest>` works for both commands. `not_found`
+means the link is already gone. After an uncertain delete, run `unlink <LINK-ID>`
+without `--yes` to check whether it succeeded.
 
 ## Auth
 

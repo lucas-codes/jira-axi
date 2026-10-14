@@ -90,8 +90,8 @@ test('parses issue links in both directions and subtasks', () => {
     fields: {
       summary: 's',
       issuelinks: [
-        { type: { name: 'Blocks', inward: 'is blocked by', outward: 'blocks' }, outwardIssue: { key: 'DEMO-4', fields: { summary: 'later', status: { name: 'To Do' } } } },
-        { type: { name: 'Blocks', inward: 'is blocked by', outward: 'blocks' }, inwardIssue: { key: 'DEMO-5', fields: { summary: 'earlier' } } },
+        { id: '1', type: { id: '10000', name: 'Blocks', inward: 'is blocked by', outward: 'blocks' }, outwardIssue: { key: 'DEMO-4', fields: { summary: 'later', status: { name: 'To Do' } } } },
+        { id: '2', type: { id: '10000', name: 'Blocks', inward: 'is blocked by', outward: 'blocks' }, inwardIssue: { key: 'DEMO-5', fields: { summary: 'earlier' } } },
       ],
       subtasks: [{ key: 'DEMO-6', fields: { summary: 'bit', status: { name: 'Done' } } }],
     },
@@ -101,6 +101,10 @@ test('parses issue links in both directions and subtasks', () => {
     ['is blocked by', 'DEMO-5'],
   ]);
   assert.equal(issue.links[0]!.status, 'To Do');
+  assert.deepEqual(issue.links.map((l) => [l.id, l.summary, l.direction, l.linkType]), [
+    ['1', 'later', 'outward', { id: '10000', name: 'Blocks', inward: 'is blocked by', outward: 'blocks' }],
+    ['2', 'earlier', 'inward', { id: '10000', name: 'Blocks', inward: 'is blocked by', outward: 'blocks' }],
+  ]);
   assert.deepEqual(issue.subtasks.map((s) => s.key), ['DEMO-6']);
 });
 
@@ -112,6 +116,11 @@ test('survives missing and unexpected fields', () => {
   assert.equal(issue.description, '');
   assert.throws(() => parseIssue('nope'), /not a JSON object/);
   assert.deepEqual(parseIssueList(null), []);
+  const linked = parseIssue({ key: 'DEMO-8', fields: { issuelinks: [
+    { type: { name: 'Blocks' }, outwardIssue: { key: 'DEMO-9' } },
+    { id: '3', type: { id: '10003', name: 'Relates', inward: 'relates to', outward: 'relates to' }, inwardIssue: { key: 'DEMO-10' } },
+  ] } });
+  assert.deepEqual(linked.links.map(l => [l.id, l.type, l.key]), [['3', 'relates to', 'DEMO-10']]);
 });
 
 test('accepts the `{issues:[...]}` envelope as well as a bare array', () => {

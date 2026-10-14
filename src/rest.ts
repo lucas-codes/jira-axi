@@ -9,6 +9,7 @@ import { restRead } from './commands/rest-read.ts';
 import { restWrite } from './commands/rest-write.ts';
 import { restTransition, restTransitions } from './commands/rest-transition.ts';
 import { restAttach, restAttachments, restDetach, restDownload } from './commands/rest-attachment.ts';
+import { restLink, restUnlink } from './commands/rest-link.ts';
 export interface Runtime extends ApiRuntime {
   env: Env;
   /** Bytes are a downloaded attachment for stdout, written verbatim. */
@@ -58,6 +59,10 @@ export async function restCommand(args: Args, runtime: Runtime): Promise<string 
     return restAttach(args, runtime);
   if (name === 'download')
     return restDownload(args, runtime);
+  if (name === 'link')
+    return restLink(args, runtime);
+  if (name === 'unlink')
+    return restUnlink(args, runtime);
   if (name === 'detach')
     return restDetach(args, runtime);
   if (['issue', 'view', 'list', 'ls', 'sprint'].includes(name))
