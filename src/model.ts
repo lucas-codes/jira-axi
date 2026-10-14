@@ -167,30 +167,43 @@ function parseComments(v: unknown): { comments: Comment[]; total: number } {
   return { comments, total };
 }
 
-export function parseLinkType(value: unknown): LinkType {
+function linkTypeOf(value: unknown): LinkType | undefined {
   const t = rec(value);
   if (!t || !['id', 'name', 'inward', 'outward'].every(k => typeof t[k] === 'string' && t[k]))
-    throw new JiraError('Malformed link type', 'bad_response');
+    return undefined;
   return { id: t.id as string, name: t.name as string, inward: t.inward as string, outward: t.outward as string };
 }
 
+export function parseLinkType(value: unknown): LinkType {
+  const type = linkTypeOf(value);
+  if (!type)
+    throw new JiraError('Malformed link type', 'bad_response');
+  return type;
+}
+
+function issueLinkOf(raw: unknown): IssueLink | undefined {
+  const l = rec(raw);
+  const inward = rec(l?.inwardIssue);
+  const outward = rec(l?.outwardIssue);
+  const other = outward ?? inward;
+  const linkType = linkTypeOf(l?.type);
+  const status = rec(rec(other?.fields)?.status)?.name;
+  if (!l || !linkType || typeof l.id !== 'string' || !/^[1-9]\d{0,18}$/.test(l.id) || !other || !!inward === !!outward || typeof other.key !== 'string' || !/^[A-Z][A-Z0-9_]*-\d+$/.test(other.key) || (status != null && typeof status !== 'string'))
+    return undefined;
+  const direction = outward ? 'outward' : 'inward';
+  return { id: l.id, type: linkType[direction], key: other.key, summary: str(rec(other.fields)?.summary), status: status as string | undefined, linkType, direction };
+}
+
+/** Strict: link and unlink decide writes from this, so a record it cannot read must stop them. */
 export function parseIssueLinks(value: unknown): IssueLink[] {
   if (value == null) return [];
   if (!Array.isArray(value))
     throw new JiraError('Malformed issue links', 'bad_response');
   return value.map(raw => {
-    const l = rec(raw);
-    const inward = rec(l?.inwardIssue);
-    const outward = rec(l?.outwardIssue);
-    const other = outward ?? inward;
-    if (!l || typeof l.id !== 'string' || !/^[1-9]\d{0,18}$/.test(l.id) || !other || !!inward === !!outward || typeof other.key !== 'string' || !/^[A-Z][A-Z0-9_]*-\d+$/.test(other.key))
+    const link = issueLinkOf(raw);
+    if (!link)
       throw new JiraError('Malformed issue link', 'bad_response');
-    const status = rec(rec(other.fields)?.status)?.name;
-    if (status != null && typeof status !== 'string')
-      throw new JiraError('Malformed linked issue status', 'bad_response');
-    const linkType = parseLinkType(l.type);
-    const direction = outward ? 'outward' : 'inward';
-    return { id: l.id, type: linkType[direction], key: other.key, summary: str(rec(other.fields)?.summary), status: status as string | undefined, linkType, direction };
+    return link;
   });
 }
 
@@ -262,7 +275,7 @@ export function parseIssue(input: unknown, opts: ParseOptions = {}): Issue {
     comments,
     commentTotal: total,
     subtasks: parseSubtasks(pick(f, 'subtasks', 'Subtasks')),
-    links: parseIssueLinks(pick(f, 'issuelinks', 'issueLinks')),
+    links: [pick(f, 'issuelinks', 'issueLinks')].flat().flatMap(raw => issueLinkOf(raw) ?? []),
     url: opts.baseUrl ? `${opts.baseUrl.replace(/\/$/, '')}/browse/${key}` : undefined,
   };
 }

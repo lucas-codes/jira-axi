@@ -116,6 +116,11 @@ test('survives missing and unexpected fields', () => {
   assert.equal(issue.description, '');
   assert.throws(() => parseIssue('nope'), /not a JSON object/);
   assert.deepEqual(parseIssueList(null), []);
+  const linked = parseIssue({ key: 'DEMO-8', fields: { issuelinks: [
+    { type: { name: 'Blocks' }, outwardIssue: { key: 'DEMO-9' } },
+    { id: '3', type: { id: '10003', name: 'Relates', inward: 'relates to', outward: 'relates to' }, inwardIssue: { key: 'DEMO-10' } },
+  ] } });
+  assert.deepEqual(linked.links.map(l => [l.id, l.type, l.key]), [['3', 'relates to', 'DEMO-10']]);
 });
 
 test('accepts the `{issues:[...]}` envelope as well as a bare array', () => {
