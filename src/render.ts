@@ -65,8 +65,8 @@ export function renderIssue(issue: Issue, opts: RenderIssueOptions): string {
   if (issue.links.length) {
     out.table(
       'links',
-      ['relation', 'key', 'status', 'summary'],
-      issue.links.map((l) => [l.type, l.key, l.status ?? '-', clip(l.summary, opts.full)]),
+      ['id', 'type', 'relation', 'key', 'status', 'summary'],
+      issue.links.map((l) => [l.id, l.linkType.name, l.type, l.key, l.status ?? '-', clip(l.summary, opts.full)]),
     );
   }
 

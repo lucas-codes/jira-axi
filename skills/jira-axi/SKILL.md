@@ -1,6 +1,6 @@
 ---
 name: jira-axi
-description: "Operate Jira through the jira-axi CLI - reading issues, sprints, and your own queue, and writing comments, creating issues, editing fields, moving issues through their workflow, and uploading, downloading or deleting attachments. Use whenever a task touches Jira: looking up an issue by key, listing or filtering issues (by assignee, status, type, label, sprint, or JQL), reading sprint boards, adding a comment, filing a new issue, editing an existing issue's summary/priority/assignee/labels/parent, changing an issue's status (transition), or storing and retrieving a file byte-exact as an issue attachment."
+description: "Operate Jira through the jira-axi CLI - reading issues, sprints, and your own queue, and writing comments, creating issues, editing fields, moving issues through their workflow, linking and unlinking issues, and uploading, downloading or deleting attachments. Use whenever a task touches Jira: looking up an issue by key, listing or filtering issues (by assignee, status, type, label, sprint, or JQL), reading sprint boards, adding a comment, filing a new issue, editing an existing issue's summary/priority/assignee/labels/parent, changing an issue's status (transition), or storing and retrieving a file byte-exact as an issue attachment."
 user-invocable: false
 author: Lucas Lim
 metadata:
@@ -31,17 +31,22 @@ copies go stale. Get the current source of truth from the CLI itself:
 
 Commands, for orientation only: `status` (the no-argument dashboard), `me`, `issue`,
 `list`, `sprint`, `transitions`, `attachments`, `download`, `comment`, `create`,
-`edit`, `transition`, `attach`, `detach`.
+`edit`, `transition`, `attach`, `detach`, `link`, `unlink`.
 
 ## Notes an agent should not have to rediscover
 
-- Every write command (`comment`, `create`, `edit`, `transition`, `attach`, `detach`) prints the exact payload it is
+- Every write command (`comment`, `create`, `edit`, `transition`, `attach`, `detach`, `link`, `unlink`) prints the exact payload it is
   about to send and does nothing without `--yes`. Re-run the identical command with
   `--yes` to apply it - nothing is inferred or auto-confirmed.
 - Status changes are not an `edit` field. Use `jira-axi transitions <KEY>` to list the
   available transitions, then `jira-axi transition <KEY> --to <name or target status>`.
   Unknown or ambiguous names fail with the options; screen transitions with required
   fields are refused rather than guessed.
+- `link A B --type <name or phrase>` reads as A <phrase> B. An inward phrase
+  reverses the direction. Existing links return `existing: true` without a POST;
+  symmetric types match either direction. `issue <KEY>` lists link ids and
+  direction phrases. `unlink <LINK-ID>` deletes one link; `not_found` means it
+  is already gone. Preview both commands before applying them.
 - When content must survive byte-for-byte (Markdown with frontmatter, generated
   plans, binaries), use an attachment, not a comment: comment Markdown is converted
   to ADF and does not round-trip. `attachments <KEY>` lists them newest first;

@@ -90,8 +90,8 @@ test('parses issue links in both directions and subtasks', () => {
     fields: {
       summary: 's',
       issuelinks: [
-        { type: { name: 'Blocks', inward: 'is blocked by', outward: 'blocks' }, outwardIssue: { key: 'DEMO-4', fields: { summary: 'later', status: { name: 'To Do' } } } },
-        { type: { name: 'Blocks', inward: 'is blocked by', outward: 'blocks' }, inwardIssue: { key: 'DEMO-5', fields: { summary: 'earlier' } } },
+        { id: '1', type: { id: '10000', name: 'Blocks', inward: 'is blocked by', outward: 'blocks' }, outwardIssue: { key: 'DEMO-4', fields: { summary: 'later', status: { name: 'To Do' } } } },
+        { id: '2', type: { id: '10000', name: 'Blocks', inward: 'is blocked by', outward: 'blocks' }, inwardIssue: { key: 'DEMO-5', fields: { summary: 'earlier' } } },
       ],
       subtasks: [{ key: 'DEMO-6', fields: { summary: 'bit', status: { name: 'Done' } } }],
     },
@@ -101,6 +101,10 @@ test('parses issue links in both directions and subtasks', () => {
     ['is blocked by', 'DEMO-5'],
   ]);
   assert.equal(issue.links[0]!.status, 'To Do');
+  assert.deepEqual(issue.links.map((l) => [l.id, l.summary, l.direction, l.linkType]), [
+    ['1', 'later', 'outward', { id: '10000', name: 'Blocks', inward: 'is blocked by', outward: 'blocks' }],
+    ['2', 'earlier', 'inward', { id: '10000', name: 'Blocks', inward: 'is blocked by', outward: 'blocks' }],
+  ]);
   assert.deepEqual(issue.subtasks.map((s) => s.key), ['DEMO-6']);
 });
 

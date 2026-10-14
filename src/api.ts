@@ -21,6 +21,10 @@ const routes: [
   ['GET', new RegExp(`^/rest/api/3/issue/${key}/transitions$`), ['expand']],
   ['GET', /^\/rest\/api\/3\/search\/jql$/, ['jql', 'maxResults', 'fields']],
   ['GET', /^\/rest\/api\/3\/user\/assignable\/search$/, ['query', 'project', 'issueKey', 'maxResults']],
+  ['GET', /^\/rest\/api\/3\/issueLinkType$/, []],
+  ['GET', /^\/rest\/api\/3\/issueLink\/[1-9]\d{0,18}$/, []],
+  ['POST', /^\/rest\/api\/3\/issueLink$/, []],
+  ['DELETE', /^\/rest\/api\/3\/issueLink\/[1-9]\d{0,18}$/, []],
   ['GET', /^\/rest\/api\/3\/attachment\/meta$/, []],
   ['GET', /^\/rest\/api\/3\/attachment\/[1-9]\d{0,18}$/, []],
   ['GET', /^\/rest\/api\/3\/attachment\/content\/[1-9]\d{0,18}$/, ['redirect']],
@@ -129,7 +133,7 @@ async function send(method: string, input: string, runtime: ApiRuntime, payload?
     }
     if (method !== 'GET' && response.ok && response.status !== writeStatus(method, url.pathname))
       throw new JiraError('Unexpected write response', 'write_outcome_unknown');
-    if (response.status === 204)
+    if (response.status === 204 || (method === 'POST' && url.pathname === '/rest/api/3/issueLink' && response.status === 201))
       return null;
     if (binary && response.status === 200)
       return await readCapped(response, ATTACHMENT_CAP, controller, 'Attachment exceeds 10 MiB');
@@ -210,7 +214,7 @@ async function apply(plan: PlannedWrite, grant: WriteGrant, runtime: ApiRuntime,
       if (!Array.isArray(result) || result.length !== 1 || !result[0] || typeof result[0] !== 'object' || !['string', 'number'].includes(typeof result[0].id))
         throw new JiraError('Malformed write response', 'bad_response');
     }
-    else if (plan.method === 'POST' && !isTransition(plan.path)) {
+    else if (plan.method === 'POST' && !isTransition(plan.path) && plan.path !== '/rest/api/3/issueLink') {
       if (!result || typeof result !== 'object' || Array.isArray(result))
         throw new JiraError('Malformed write response', 'bad_response');
       const r = result as Record<string, unknown>;
