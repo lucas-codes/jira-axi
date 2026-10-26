@@ -24,10 +24,10 @@
     "README.md"
   ],
   "engines": {
-    "node": "v26.12.0"
+    "node": "26.12.1"
   },
   "volta": {
-    "node": "24.22.0"
+    "node": "24.22.1"
   },
   "scripts": {
     "build": "bun build src/index.ts --target=node --outdir=dist && chmod +x bin/jira-axi",
@@ -37,8 +37,8 @@
     "prepack": "npm run build"
   },
   "devDependencies": {
-    "@toon-format/toon": "4.1.1",
-    "@types/node": "24.13.5",
+    "@toon-format/toon": "4.4.0",
+    "@types/node": "24.19.2",
     "typescript": "5.9.3"
   }
 }
