@@ -2,6 +2,8 @@ import { readFileSync } from 'node:fs';
 import { assertKnownFlags, flagBool, flagList, flagStr, type Args } from '../args.ts';
 import { read, write } from '../api.ts';
 import { adfToText } from '../adf.ts';
+import { flaggedField } from '../flagged.ts';
+import { parseFlagged } from '../model.ts';
 import { Out } from '../format.ts';
 import { JiraError } from '../jira.ts';
 import { markdownToAdf } from '../markdown-adf.ts';
@@ -19,7 +21,7 @@ export const CREATE_FLAGS = [
 
 export const EDIT_FLAGS = [
   'summary', 's', 'priority', 'y', 'assignee', 'a', 'parent', 'P', 'label', 'l',
-  'component', 'C', 'file', 'F', 'stdin', 'skip-notify', 'yes', 'json',
+  'component', 'C', 'file', 'F', 'stdin', 'skip-notify', 'flag', 'unflag', 'yes', 'json',
 ];
 
 function bodyText(args: Args, runtime: Runtime, required: boolean): string {
@@ -89,6 +91,9 @@ export async function restWrite(args: Args, runtime: Runtime): Promise<string> {
     const value = flagStr(args, ...names);
     if (value !== undefined) assertOutboundText(field, value);
   }
+  if (args.flags.has('flag') && args.flags.has('unflag'))
+    throw new JiraError('--flag and --unflag cannot be used together', 'usage');
+  const flag = flagBool(args, 'flag') ? true : flagBool(args, 'unflag') ? false : undefined;
   const p = command === 'create' ? project(args, runtime.env) : projectKey(args, runtime.env);
   const key = command === 'create' ? undefined : requireRestKey(args.positional[0], p);
   const parentRaw = flagStr(args, 'parent', 'P');
@@ -103,7 +108,7 @@ export async function restWrite(args: Args, runtime: Runtime): Promise<string> {
     throw new JiraError('create requires --summary and --type', 'usage');
   const wantsBody = command !== 'edit' || !!flagStr(args, 'file', 'F') || flagBool(args, 'stdin');
   const source = wantsBody ? bodyText(args, runtime, command === 'comment') : '';
-  if (command === 'edit' && !summary && !priority && !userInput && !parent && !source && !labels.length && !components.length)
+  if (command === 'edit' && !summary && !priority && !userInput && !parent && !source && !labels.length && !components.length && flag === undefined)
     throw new JiraError('edit requires at least one explicit field flag', 'usage');
   assertNoSecrets(source, hidden);
   const converted = source ? markdownToAdf(source) : undefined;
@@ -112,8 +117,11 @@ export async function restWrite(args: Args, runtime: Runtime): Promise<string> {
   const diffs: Record<string, string> = {};
   let target: string | undefined;
   let old: Record<string, unknown> = {};
+  const flagField = flag !== undefined ? await flaggedField(runtime) : undefined;
+  if (flag !== undefined && !flagField)
+    throw new JiraError('This Jira site has no Flagged field', 'unsupported');
   if (key) {
-    const raw = issueShape(await read(`/rest/api/3/issue/${key}`, new URLSearchParams({ fields: command === 'comment' ? 'summary' : 'summary,priority,assignee,labels,components,parent,description' }), runtime));
+    const raw = issueShape(await read(`/rest/api/3/issue/${key}`, new URLSearchParams({ fields: command === 'comment' ? 'summary' : 'summary,priority,assignee,labels,components,parent,description' + (flagField ? `,${flagField}` : '') }), runtime));
     if (raw.key !== key)
       throw new JiraError(`Issue moved to ${raw.key}`, 'issue_moved');
     old = object(raw.fields);
@@ -133,6 +141,10 @@ export async function restWrite(args: Args, runtime: Runtime): Promise<string> {
     if (command === 'create') {
       fields.project = { key: p };
       fields.issuetype = { name: type };
+    }
+    if (flagField) {
+      fields[flagField] = flag ? [{ value: 'Impediment' }] : null;
+      diffs.flagged = `${parseFlagged(old[flagField])} -> ${flag}`;
     }
     if (summary) {
       fields.summary = summary;
@@ -202,9 +214,21 @@ export async function restWrite(args: Args, runtime: Runtime): Promise<string> {
     }
     throw error;
   }
+  let flagged: boolean | undefined;
+  if (flagField) {
+    try {
+      const raw = issueShape(await read(`/rest/api/3/issue/${key}`, new URLSearchParams({ fields: flagField }), runtime));
+      flagged = parseFlagged(object(raw.fields)[flagField]);
+    }
+    catch (error) {
+      const acknowledged = new JiraError('Edit applied, but reading the Flagged value failed', error instanceof JiraError ? error.code : 'transport_error', `Read back before retrying: jira-axi issue ${key}`);
+      acknowledged.details.applied = true;
+      throw acknowledged;
+    }
+  }
   const response = result === null ? {} : object(result);
   const created = command === 'create' ? String(response.key) : undefined;
-  const applied = cleanModel({ action, applied: true, payloadDigest: preview.payloadDigest, ...(key ? { issue: key } : {}), ...(created ? { key: created } : {}), ...(command === 'comment' ? { commentId: response.id, chars: source.length } : {}), url: `${siteOrigin(runtime.env)}/browse/${created ?? key}` }, hidden);
+  const applied = cleanModel({ action, applied: true, ...(flagged !== undefined ? { flagged } : {}), payloadDigest: preview.payloadDigest, ...(key ? { issue: key } : {}), ...(created ? { key: created } : {}), ...(command === 'comment' ? { commentId: response.id, chars: source.length } : {}), url: `${siteOrigin(runtime.env)}/browse/${created ?? key}` }, hidden);
   const out = new Out();
   for (const [field, value] of Object.entries(applied))
     out.kv(field, value as string | boolean | number);

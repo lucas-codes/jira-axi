@@ -1,6 +1,6 @@
 ---
 name: jira-axi
-description: "Operate Jira through the jira-axi CLI - reading issues, sprints, and your own queue, and writing comments, creating issues, editing fields, moving issues through their workflow, linking and unlinking issues, and uploading, downloading or deleting attachments. Use whenever a task touches Jira: looking up an issue by key, listing or filtering issues (by assignee, status, type, label, sprint, or JQL), reading sprint boards, adding a comment, filing a new issue, editing an existing issue's summary/priority/assignee/labels/parent, changing an issue's status (transition), or storing and retrieving a file byte-exact as an issue attachment."
+description: "Operate Jira through the jira-axi CLI - reading issues, sprints, and your own queue, and writing comments, creating issues, editing fields, moving issues through their workflow, linking and unlinking issues, and uploading, downloading or deleting attachments. Use whenever a task touches Jira: looking up an issue by key, listing or filtering issues (by assignee, status, type, label, sprint, or JQL), reading sprint boards, adding a comment, filing a new issue, editing an existing issue's summary/priority/assignee/labels/parent/flag, changing an issue's status (transition), or storing and retrieving a file byte-exact as an issue attachment."
 user-invocable: false
 author: Lucas Lim
 metadata:
@@ -38,6 +38,9 @@ Commands, for orientation only: `status` (the no-argument dashboard), `me`, `iss
 - Every write command (`comment`, `create`, `edit`, `transition`, `attach`, `detach`, `link`, `unlink`) prints the exact payload it is
   about to send and does nothing without `--yes`. Re-run the identical command with
   `--yes` to apply it - nothing is inferred or auto-confirmed.
+- Flagged is a boolean. The site field is resolved by exact name `Flagged`.
+  `issue` and `list` show it when available. `edit --flag` sets it and
+  `--unflag` clears it through the usual preview and `--yes` flow.
 - Status changes are not an `edit` field. Use `jira-axi transitions <KEY>` to list the
   available transitions, then `jira-axi transition <KEY> --to <name or target status>`.
   Unknown or ambiguous names fail with the options; screen transitions with required

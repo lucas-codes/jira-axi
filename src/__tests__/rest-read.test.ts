@@ -8,17 +8,17 @@ import { adfToText } from '../adf.ts';
 const fixture=(n:string)=>JSON.parse(readFileSync(new URL(`fixtures/${n}.json`,import.meta.url),'utf8'));
 test('issue uses bounded comment page, newest reversed, goldens unchanged',async()=>{
  const issue=fixture('issue-view-comments');const page=issue.fields.comment;delete issue.fields.comment;
- for(const flags of [[],['--comments'],['--full'],['--comments','101']]){const r=await run(['issue','demo-101',...flags,'--json'],[issue,{...page,comments:[...page.comments].reverse()}]);assert.equal(r.exit,0,r.output);assert.equal(r.calls.length,2);const url=new URL(r.calls[1]!.url);assert.equal(url.searchParams.get('orderBy'),'-created');assert.equal(url.searchParams.get('maxResults'),flags.includes('--full')||flags.includes('101')?'100':flags.length?'10':'1');assert.deepEqual(r.value.comments.map((c:{id:string})=>c.id),page.comments.map((c:{id:string})=>c.id));}
+ for(const flags of [[],['--comments'],['--full'],['--comments','101']]){const r=await run(['issue','demo-101',...flags,'--json'],[issue,{...page,comments:[...page.comments].reverse()}]);assert.equal(r.exit,0,r.output);assert.equal(r.calls.length,3);const url=new URL(r.calls[2]!.url);assert.equal(url.searchParams.get('orderBy'),'-created');assert.equal(url.searchParams.get('maxResults'),flags.includes('--full')||flags.includes('101')?'100':flags.length?'10':'1');assert.deepEqual(r.value.comments.map((c:{id:string})=>c.id),page.comments.map((c:{id:string})=>c.id));}
 });
 test('REST search is one page, empty success; schemas fail closed',async()=>{
- const r=await run(['list','--assignee','me','--json'],[fixture('rest-search')]);assert.equal(r.exit,0,r.output);assert.equal(r.calls.length,1);assert.match(new URL(r.calls[0]!.url).searchParams.get('jql')!,/currentUser\(\)/);
+ const r=await run(['list','--assignee','me','--json'],[fixture('rest-search')]);assert.equal(r.exit,0,r.output);assert.equal(r.calls.length,2);assert.match(new URL(r.calls[1]!.url).searchParams.get('jql')!,/currentUser\(\)/);
  const empty=await run(['list'],[{issues:[],isLast:true}]);assert.equal(empty.exit,0);assert.match(empty.output,/No issues matched/);
  for(const data of [null,{issues:null,isLast:true},{issues:[],isLast:0},{issues:[{key:'DEMO-1',fields:null}],isLast:true}])assert.equal((await run(['list','--json'],[data])).value.code,'bad_response');
  for(const data of [{comments:null,total:0},{comments:[],total:0.1},{comments:[{body:{}}],total:1}])assert.equal((await run(['issue','DEMO-1','--json'],[{key:'DEMO-1',fields:{}},data])).value.code,'bad_response');
 });
 test('sprint paging and picks, empty windows and kanban refusal',async()=>{
  const pages=[{values:[{id:1,name:'Old',state:'active'}],isLast:false},{values:[{id:2,name:'New',state:'active'}],isLast:true}];
- const r=await run(['list','--type','Task','--sprint','current','--json'],[...pages,{issues:[],isLast:true}]);assert.equal(r.exit,0,r.output);assert.equal(new URL(r.calls[1]!.url).searchParams.get('startAt'),'1');assert.match(new URL(r.calls[2]!.url).searchParams.get('jql')!,/type="Task" AND sprint = 2/);
+ const r=await run(['list','--type','Task','--sprint','current','--json'],[...pages,{issues:[],isLast:true}]);assert.equal(r.exit,0,r.output);assert.equal(new URL(r.calls[1]!.url).searchParams.get('startAt'),'1');assert.match(new URL(r.calls[3]!.url).searchParams.get('jql')!,/type="Task" AND sprint = 2/);
  assert.equal((await run(['sprint','--json'],[{values:[],isLast:true}])).exit,0);
  const empty=await run(['list','--sprint','next','--json'],[{values:[],isLast:true}]);assert.equal(empty.value.code,'not_found');assert.match(empty.value.error,/42.*future/);assert.equal(empty.calls.length,1);
  for(const page of [{values:[],isLast:false},{values:[{name:'Bad',state:'active'}],isLast:true}])assert.equal((await run(['sprint','--json'],[page])).value.code,'bad_response');
@@ -50,4 +50,28 @@ test('ADF roots, node attributes, depth/count and safe external links',()=>{
  assert.equal(adfToText(doc([{type:'paragraph',content:[{type:'unknownLeaf'}]}])),'[unsupported: unknownLeaf]');
  assert.equal(adfToText(doc([{type:'paragraph',content:[{type:'unknownContainer',content:[{type:'text',text:'readable'}]}]}])),'readable');
  let nested:unknown={type:'text',text:'a'};for(let i=0;i<66;i++)nested={type:'paragraph',content:[nested]};assert.throws(()=>adfToText(doc([nested])),{code:'bad_response'});assert.throws(()=>adfToText(doc(Array(100000).fill({type:'hardBreak'}))),{code:'bad_response'});
+});
+
+test('issue exposes Flagged as a boolean in text and JSON and omits it on unsupported sites',async()=>{
+ for(const value of [[{value:'Impediment'}],null,[]])for(const json of [false,true]){
+  const r=await run(['issue','DEMO-1',...(json?['--json']:[])],[{key:'DEMO-1',fields:{customfield_99999:value}},{comments:[],total:0}],200,{},[{id:'customfield_99999',name:'Flagged'}]);
+  assert.equal(r.exit,0,r.output);const expected=Array.isArray(value)&&value.length>0;
+  if(json)assert.equal(r.value.flagged,expected);else assert.match(r.output,new RegExp(`flagged: ${expected}`));
+  assert.ok(new URL(r.calls[1]!.url).searchParams.get('fields')!.includes('customfield_99999'));
+ }
+ for(const json of [false,true]){
+  const r=await run(['issue','DEMO-1',...(json?['--json']:[])],[{key:'DEMO-1',fields:{}},{comments:[],total:0}]);assert.equal(r.exit,0,r.output);assert.ok(!r.output.includes('flagged'));
+ }
+});
+test('list includes the flagged column in compact and full output and the JSON boolean',async()=>{
+ for(const flags of [[],['--full'],['--json']]){
+  const r=await run(['list',...flags],[{issues:[{key:'DEMO-1',fields:{customfield_99999:[{value:'Impediment'}]}}],isLast:true}],200,{},[{id:'customfield_99999',name:'Flagged'}]);
+  assert.equal(r.exit,0,r.output);if(flags.includes('--json'))assert.equal(r.value.issues[0].flagged,true);else {assert.match(r.output,/issues\[1\]\{[^}]*flagged/);assert.match(r.output,/,true/);}
+ }
+});
+test('malformed or ambiguous Flagged metadata and malformed issue values fail closed',async()=>{
+ for(const fields of [{},[null],[{name:'Flagged'}],[{id:'a',name:'Flagged'},{id:'b',name:'Flagged'}]]){
+  const r=await run(['issue','DEMO-1','--json'],[],200,{},fields);assert.equal(r.exit,1);assert.equal(r.value.code,Array.isArray(fields)&&fields.length===2?'ambiguous_field':'bad_response');
+ }
+ const r=await run(['issue','DEMO-1','--json'],[{key:'DEMO-1',fields:{customfield_99999:'bad'}},{comments:[],total:0}],200,{},[{id:'customfield_99999',name:'Flagged'}]);assert.equal(r.value.code,'bad_response');
 });

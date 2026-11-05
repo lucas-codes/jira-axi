@@ -28,6 +28,7 @@ async function run(args: string[], scenario: Scenario = {}, json = true) {
       const url = new URL(String(input));
       const method = init?.method ?? 'GET';
       calls.push({ method, path: url.pathname, body: init?.body ? JSON.parse(String(init.body)) : null, fields: url.searchParams.get('fields') });
+      if (url.pathname === '/rest/api/3/field') return Response.json([]);
       if (method === 'POST') {
         posted = true;
         return new Response(null, { status: scenario.postStatus ?? 201 });
@@ -185,7 +186,7 @@ test('issue shows link ids, type and perspective in compact and JSON output', as
   const r = await run(['issue', 'ED-1'], { before: [entry()] });
   assert.equal(r.exit, 0, r.output);
   assert.deepEqual(r.value.links, [{ id: '133547', type: 'blocks', key: 'ED-2', summary: 'Second issue', status: 'Done', linkType: { id: '10000', name: 'Blocks', inward: 'is blocked by', outward: 'blocks' }, direction: 'outward' }]);
-  assert.equal(r.calls[0]!.fields?.split(',').includes('issuelinks'), true);
+  assert.equal(r.calls[1]!.fields?.split(',').includes('issuelinks'), true);
   const compact = await run(['issue', 'ED-1'], { before: [entry(), entry('inward')] }, false);
   assert.match(compact.output, /links\[2\]\{id,type,relation,key,status,summary\}:\n  "133547",Blocks,blocks,ED-2,Done,Second issue\n  "133547",Blocks,is blocked by,ED-2,Done,Second issue/);
 });

@@ -6,7 +6,7 @@ import { markdownToAdf } from '../markdown-adf.ts';
 import { adfToText } from '../adf.ts';
 const env={ATLASSIAN_EMAIL:'reader@example.com',ATLASSIAN_API_TOKEN:'DUMMY_SECRET',ATLASSIAN_SITE:'example.atlassian.net',JIRA_PROJECT:'DEMO',JIRA_BOARD:'42'};
 const target={key:'DEMO-1',fields:{summary:'Old',priority:{name:'Low'},labels:['old'],components:[{name:'Old'}],assignee:{displayName:'Other'},parent:{key:'DEMO-2'}}};
-async function run(args:string[],responses:unknown[]=[target],body='Hello **world**',writeStatus=201){let output='';const calls:{url:string;init?:RequestInit}[]=[];const exit=await main([...args,'--json'],{env,stdin:{isTTY:true,read:()=>body},fetch:async(url,init)=>{calls.push({url:String(url),init});const mutation=init?.method!=='GET';return mutation?(writeStatus===204?new Response(null,{status:204}):Response.json(responses.shift()??{id:'99',key:'DEMO-99'},{status:writeStatus})):Response.json(responses.shift());},write:s=>output+=s});return{exit,output,calls,value:JSON.parse(output)};}
+async function run(args:string[],responses:unknown[]=[target],body='Hello **world**',writeStatus=201,fields:unknown=[],json=true){let output='';const calls:{url:string;init?:RequestInit}[]=[];const exit=await main([...args,...(json?['--json']:[])],{env,stdin:{isTTY:true,read:()=>body},fetch:async(url,init)=>{calls.push({url:String(url),init});if(new URL(String(url)).pathname==='/rest/api/3/field')return Response.json(fields);const mutation=init?.method!=='GET';return mutation?(writeStatus===204?new Response(null,{status:204}):Response.json(responses.shift()??{id:'99',key:'DEMO-99'},{status:writeStatus})):Response.json(responses.shift());},write:s=>output+=s});return{exit,output,calls,value:json?JSON.parse(output):undefined};}
 test('comment previews same request as send; internal and digest gate',async()=>{
  const args=['comment','DEMO-1','--file=-','--internal'];const preview=await run(args);assert.equal(preview.exit,0,preview.output);assert.equal(preview.calls.length,1);assert.equal(preview.value.applied,false);assert.match(preview.value.payloadDigest,/^[a-f0-9]{12}$/);assert.equal(preview.value.target,'Old');assert.deepEqual(preview.value.request.body,{body:markdownToAdf('Hello **world**').doc,properties:[{key:'sd.public.comment',value:{internal:true}}]});
  const applied=await run([...args,'--yes','--confirm',preview.value.payloadDigest]);assert.equal(applied.exit,0,applied.output);assert.equal(applied.value.commentId,'99');assert.equal(applied.value.chars,'Hello **world**'.length);assert.deepEqual(JSON.parse(applied.calls[1]!.init!.body as string),preview.value.request.body);assert.equal(applied.calls[1]!.init?.method,'POST');assert.equal((applied.calls[1]!.init?.headers as Record<string,string>)['Content-Type'],'application/json');
@@ -71,3 +71,34 @@ function typeOnly() {
  // @ts-expect-error An ungated write must not typecheck.
  write({method:'POST',path:'/rest/api/3/issue',query:{},body:{}}, {env,fetch});
 }
+
+test('flag and unflag resolve the site field, preview the change and report the read-back state',async()=>{
+ for(const flag of [true,false]){
+  const fields=[{id:'customfield_99999',name:'Flagged'}];const before={key:'DEMO-1',fields:{summary:'Old',customfield_99999:flag?null:[{value:'Impediment'}]}};
+  const args=['edit','DEMO-1',flag?'--flag':'--unflag'];
+  const preview=await run(args,[before],'',204,fields);assert.equal(preview.exit,0,preview.output);
+  assert.equal(preview.value.issue,'DEMO-1');assert.equal(preview.value.target,'Old');assert.equal(preview.value.diff.flagged,`${!flag} -> ${flag}`);
+  assert.deepEqual(preview.value.request.body,{fields:{customfield_99999:flag?[{value:'Impediment'}]:null}});
+  assert.ok(new URL(preview.calls[1]!.url).searchParams.get('fields')!.includes('customfield_99999'));
+  const applied=await run([...args,'--yes','--confirm',preview.value.payloadDigest],[before,{key:'DEMO-1',fields:{customfield_99999:flag?[{value:'Impediment'}]:null}}],'',204,fields);
+  assert.equal(applied.exit,0,applied.output);assert.equal(applied.value.flagged,flag);assert.equal(applied.value.applied,true);
+  const puts=applied.calls.filter(c=>c.init?.method==='PUT');assert.equal(puts.length,1);assert.deepEqual(JSON.parse(puts[0]!.init!.body as string),preview.value.request.body);
+  assert.equal(new URL(applied.calls.at(-1)!.url).searchParams.get('fields'),'customfield_99999');
+  const textPreview=await run(args,[before],'',204,fields,false);assert.equal(textPreview.exit,0,textPreview.output);assert.match(textPreview.output,new RegExp(`flagged: ${!flag} -> ${flag}`));assert.match(textPreview.output,/issue: DEMO-1/);assert.match(textPreview.output,/target: Old/);
+  const combined=await run([...args,'--priority','High','--yes'],[before,{key:'DEMO-1',fields:{customfield_99999:flag?[{value:'Impediment'}]:null}}],'',204,fields,false);
+  assert.equal(combined.exit,0,combined.output);assert.match(combined.output,new RegExp(`flagged: ${flag}`));assert.match(combined.output,/applied: true/);
+  const combinedPuts=combined.calls.filter(c=>c.init?.method==='PUT');assert.equal(combinedPuts.length,1);assert.deepEqual(JSON.parse(combinedPuts[0]!.init!.body as string).fields,{customfield_99999:flag?[{value:'Impediment'}]:null,priority:{name:'High'}});
+ }
+});
+test('flag and unflag together fail with usage before any request',async()=>{
+ const r=await run(['edit','DEMO-1','--flag','--unflag','--yes']);assert.equal(r.exit,2);assert.equal(r.value.code,'usage');assert.equal(r.value.applied,false);assert.equal(r.calls.length,0);assert.equal(r.value.error,'--flag and --unflag cannot be used together');
+});
+test('flag edits refuse sites without a Flagged field before a PUT',async()=>{
+ const r=await run(['edit','DEMO-1','--flag','--yes']);assert.equal(r.value.code,'unsupported');assert.match(r.value.error,/Flagged/);assert.equal(r.value.applied,false);assert.ok(r.calls.every(c=>c.init?.method==='GET'));
+});
+test('flag read-back failures preserve the acknowledged edit',async()=>{
+ for(const value of ['bad',{}]){
+  const r=await run(['edit','DEMO-1','--flag','--yes'],[target,{key:'DEMO-1',fields:{customfield_99999:value}}],'',204,[{id:'customfield_99999',name:'Flagged'}]);
+  assert.equal(r.exit,1);assert.equal(r.value.code,'bad_response');assert.equal(r.value.applied,true);assert.ok(r.value.help.includes('Read back before retrying: jira-axi issue DEMO-1'));
+ }
+});

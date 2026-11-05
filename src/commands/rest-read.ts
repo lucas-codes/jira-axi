@@ -1,4 +1,5 @@
 import { assertKnownFlags, flagBool, flagNum, flagStr, type Args } from '../args.ts';
+import { flaggedField } from '../flagged.ts';
 import { read } from '../api.ts';
 import { adfToText } from '../adf.ts';
 import { JiraError } from '../jira.ts';
@@ -85,12 +86,13 @@ export async function restRead(args: Args, runtime: Runtime): Promise<string> {
   if (name === 'issue' || name === 'view') {
     assertKnownFlags(args, ISSUE_FLAGS);
     const key = requireRestKey(args.positional[0], p);
-    const raw = issueShape(await read(`/rest/api/3/issue/${key}`, new URLSearchParams({ fields: ISSUE_FIELDS }), runtime));
+    const flagField = await flaggedField(runtime);
+    const raw = issueShape(await read(`/rest/api/3/issue/${key}`, new URLSearchParams({ fields: ISSUE_FIELDS + (flagField ? `,${flagField}` : '') }), runtime));
     const want = flagBool(args, 'comments') || full;
     const n = full ? 100 : Math.min(100, Math.max(1, Math.trunc(flagNum(args, 'comments') ?? (want ? 10 : 1))));
     const comments = commentShape(await read(`/rest/api/3/issue/${key}/comment`, new URLSearchParams({ orderBy: '-created', maxResults: String(n) }), runtime));
     (raw.fields as Record<string, unknown>).comment = { ...comments, comments: [...(comments.comments as unknown[])].reverse() };
-    const model = cleanModel(parseIssue(raw, options(runtime)), hidden);
+    const model = cleanModel(parseIssue(raw, { ...options(runtime), flaggedField: flagField }), hidden);
     return json ? JSON.stringify(model, null, 2) : renderIssue(model, { full, comments: want, descriptionChars: flagNum(args, 'max-chars'), commentChars: flagNum(args, 'max-comment-chars') });
   }
   if (name === 'sprint') {
@@ -119,12 +121,13 @@ export async function restRead(args: Args, runtime: Runtime): Promise<string> {
   }
   const jql = buildJql(args, p, sprint, parent);
   const limit = Math.max(1, Math.min(100, Math.trunc(flagNum(args, 'limit') ?? 30)));
-  const data = object(await read('/rest/api/3/search/jql', new URLSearchParams({ jql, maxResults: String(limit), fields: ISSUE_FIELDS + ',comment' }), runtime));
+  const flagField = await flaggedField(runtime);
+  const data = object(await read('/rest/api/3/search/jql', new URLSearchParams({ jql, maxResults: String(limit), fields: ISSUE_FIELDS + ',comment' + (flagField ? `,${flagField}` : '') }), runtime));
   if (!Array.isArray(data.issues) || typeof data.isLast !== 'boolean')
     throw new JiraError('Malformed search response', 'bad_response');
   for (const raw of data.issues)
     issueShape(raw);
-  const issues = cleanModel(parseIssueList(data, options(runtime)), hidden);
+  const issues = cleanModel(parseIssueList(data, { ...options(runtime), flaggedField: flagField }), hidden);
   const described: string[] = [];
   const rawJql = flagStr(args, 'jql', 'q');
   if (rawJql)
@@ -148,5 +151,5 @@ export async function restRead(args: Args, runtime: Runtime): Promise<string> {
   if (sprintArg)
     described.push(`sprint=${sprintArg}`);
   const query = cleanModel(described.join(' ') || `project=${p}`, hidden);
-  return json ? JSON.stringify({ query, count: issues.length, issues }, null, 2) : renderIssueList(issues, { full, query });
+  return json ? JSON.stringify({ query, count: issues.length, issues }, null, 2) : renderIssueList(issues, { full, query, flagged: flagField !== undefined });
 }
