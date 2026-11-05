@@ -84,5 +84,5 @@ test('a text field also named Flagged neither breaks reads nor shadows the real 
  assert.equal(only.exit,0,only.output);assert.equal(only.value.flagged,undefined);
 });
 test('Flagged option members that are not options fail closed instead of reading as flagged',async()=>{
- for(const value of [[null],[{}],['Impediment']]){const r=await run(['issue','DEMO-1','--json'],[{key:'DEMO-1',fields:{customfield_99999:value}},{comments:[],total:0}],200,{},[flaggedMeta()]);assert.equal(r.exit,1,r.output);assert.equal(r.value.code,'bad_response');}
+ for(const value of [[null],[{}],['Impediment'],[{value:'Impediment'},null]]){const r=await run(['issue','DEMO-1','--json'],[{key:'DEMO-1',fields:{customfield_99999:value}},{comments:[],total:0}],200,{},[flaggedMeta()]);assert.equal(r.exit,1,r.output);assert.equal(r.value.code,'bad_response');}
 });
