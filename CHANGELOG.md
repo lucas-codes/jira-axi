@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.0](https://github.com/lucas-codes/jira-axi/compare/v0.4.0...v0.5.0) (2026-11-05)
+
+
+### Features
+
+* **edit:** read and set the Jira Flagged field ([#23](https://github.com/lucas-codes/jira-axi/issues/23)) ([4b0f017](https://github.com/lucas-codes/jira-axi/commit/4b0f017247352e2095e88bceea11ab0780427cb5))
+
+
+### Bug Fixes
+
+* **flagged:** match the checkbox field and reject malformed options ([#26](https://github.com/lucas-codes/jira-axi/issues/26)) ([ffff110](https://github.com/lucas-codes/jira-axi/commit/ffff110f0ccb5df4937a5932a0bc06273686af64))
+
 ## [0.4.0](https://github.com/lucas-codes/jira-axi/compare/v0.3.0...v0.4.0) (2026-10-14)
 
 
