@@ -6,6 +6,7 @@ import { markdownToAdf } from '../markdown-adf.ts';
 import { adfToText } from '../adf.ts';
 const env={ATLASSIAN_EMAIL:'reader@example.com',ATLASSIAN_API_TOKEN:'DUMMY_SECRET',ATLASSIAN_SITE:'example.atlassian.net',JIRA_PROJECT:'DEMO',JIRA_BOARD:'42'};
 const target={key:'DEMO-1',fields:{summary:'Old',priority:{name:'Low'},labels:['old'],components:[{name:'Old'}],assignee:{displayName:'Other'},parent:{key:'DEMO-2'}}};
+const flaggedMeta=(id='customfield_99999',custom='com.atlassian.jira.plugin.system.customfieldtypes:multicheckboxes')=>({id,name:'Flagged',schema:{type:'array',items:'option',custom}});
 async function run(args:string[],responses:unknown[]=[target],body='Hello **world**',writeStatus=201,fields:unknown=[],json=true){let output='';const calls:{url:string;init?:RequestInit}[]=[];const exit=await main([...args,...(json?['--json']:[])],{env,stdin:{isTTY:true,read:()=>body},fetch:async(url,init)=>{calls.push({url:String(url),init});if(new URL(String(url)).pathname==='/rest/api/3/field')return Response.json(fields);const mutation=init?.method!=='GET';return mutation?(writeStatus===204?new Response(null,{status:204}):Response.json(responses.shift()??{id:'99',key:'DEMO-99'},{status:writeStatus})):Response.json(responses.shift());},write:s=>output+=s});return{exit,output,calls,value:json?JSON.parse(output):undefined};}
 test('comment previews same request as send; internal and digest gate',async()=>{
  const args=['comment','DEMO-1','--file=-','--internal'];const preview=await run(args);assert.equal(preview.exit,0,preview.output);assert.equal(preview.calls.length,1);assert.equal(preview.value.applied,false);assert.match(preview.value.payloadDigest,/^[a-f0-9]{12}$/);assert.equal(preview.value.target,'Old');assert.deepEqual(preview.value.request.body,{body:markdownToAdf('Hello **world**').doc,properties:[{key:'sd.public.comment',value:{internal:true}}]});
@@ -74,7 +75,7 @@ function typeOnly() {
 
 test('flag and unflag resolve the site field, preview the change and report the read-back state',async()=>{
  for(const flag of [true,false]){
-  const fields=[{id:'customfield_99999',name:'Flagged'}];const before={key:'DEMO-1',fields:{summary:'Old',customfield_99999:flag?null:[{value:'Impediment'}]}};
+  const fields=[flaggedMeta()];const before={key:'DEMO-1',fields:{summary:'Old',customfield_99999:flag?null:[{value:'Impediment'}]}};
   const args=['edit','DEMO-1',flag?'--flag':'--unflag'];
   const preview=await run(args,[before],'',204,fields);assert.equal(preview.exit,0,preview.output);
   assert.equal(preview.value.issue,'DEMO-1');assert.equal(preview.value.target,'Old');assert.equal(preview.value.diff.flagged,`${!flag} -> ${flag}`);
@@ -98,7 +99,10 @@ test('flag edits refuse sites without a Flagged field before a PUT',async()=>{
 });
 test('flag read-back failures preserve the acknowledged edit',async()=>{
  for(const value of ['bad',{}]){
-  const r=await run(['edit','DEMO-1','--flag','--yes'],[target,{key:'DEMO-1',fields:{customfield_99999:value}}],'',204,[{id:'customfield_99999',name:'Flagged'}]);
+  const r=await run(['edit','DEMO-1','--flag','--yes'],[target,{key:'DEMO-1',fields:{customfield_99999:value}}],'',204,[flaggedMeta()]);
   assert.equal(r.exit,1);assert.equal(r.value.code,'bad_response');assert.equal(r.value.applied,true);assert.ok(r.value.help.includes('Read back before retrying: jira-axi issue DEMO-1'));
  }
+});
+test('flag edits refuse a site whose only Flagged field is not the checkbox flag',async()=>{
+ const r=await run(['edit','DEMO-1','--flag','--yes'],[target],'',204,[flaggedMeta('customfield_1','com.atlassian.jira.plugin.system.customfieldtypes:textfield')]);assert.equal(r.value.code,'unsupported');assert.equal(r.value.applied,false);assert.ok(r.calls.every(c=>c.init?.method==='GET'));
 });

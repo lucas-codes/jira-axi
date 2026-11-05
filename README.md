@@ -129,8 +129,8 @@ jira-axi transitions DEMO-101       # id, name and target status of each availab
 jira-axi attachments DEMO-101       # id, filename, size, created, author and optional authorAccountId, newest first
 ```
 
-`issue` and `list` show Flagged as a boolean when the site has a field named
-`Flagged`. The field id is resolved by name for each command.
+`issue` and `list` show Flagged as a boolean when the site has a checkbox field
+named `Flagged`. The field id is resolved by name and type for each command.
 
 A bare issue key works too: `jira-axi DEMO-101`.
 

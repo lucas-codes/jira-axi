@@ -38,7 +38,7 @@ Commands, for orientation only: `status` (the no-argument dashboard), `me`, `iss
 - Every write command (`comment`, `create`, `edit`, `transition`, `attach`, `detach`, `link`, `unlink`) prints the exact payload it is
   about to send and does nothing without `--yes`. Re-run the identical command with
   `--yes` to apply it - nothing is inferred or auto-confirmed.
-- Flagged is a boolean. The site field is resolved by exact name `Flagged`.
+- Flagged is a boolean. The site field is the checkbox field named `Flagged`.
   `issue` and `list` show it when available. `edit --flag` sets it and
   `--unflag` clears it through the usual preview and `--yes` flow.
 - Status changes are not an `edit` field. Use `jira-axi transitions <KEY>` to list the

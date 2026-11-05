@@ -18,7 +18,7 @@ export function helpText(): string {
   out.raw(
     '  Reads are free-running. Every write (comment, create, edit, transition, attach, detach, link, unlink) prints its exact payload and does nothing without --yes. Comment and description bodies are read from --file or stdin, never inline, to avoid shell quoting damage.',
   );
-  out.raw('  Flagged is a boolean resolved by the site field name. issue and list show it; edit --flag sets it and --unflag clears it.');
+  out.raw('  Flagged is a boolean read from the checkbox field named Flagged. issue and list show it; edit --flag sets it and --unflag clears it.');
   out.raw('rest:');
   out.raw('  Uses Jira Cloud REST at the site named by ATLASSIAN_SITE. --project/-p overrides JIRA_PROJECT; sprint commands and board output need JIRA_BOARD.');
   out.raw('  REST previews print payloadDigest and the resolved request; optional --confirm <digest> requires --yes and a matching digest. Unsupported Markdown is disclosed before applying ADF bodies. Never blindly retry a POST with applied: unknown; read back first.');
