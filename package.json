@@ -27,7 +27,7 @@
     "node": ">=22"
   },
   "volta": {
-    "node": "24.22.2"
+    "node": "26.13.0"
   },
   "scripts": {
     "build": "bun build src/index.ts --target=node --outdir=dist && chmod +x bin/jira-axi",
@@ -38,7 +38,7 @@
   },
   "devDependencies": {
     "@toon-format/toon": "4.4.0",
-    "@types/node": "24.19.2",
+    "@types/node": "26.6.6",
     "typescript": "5.9.3"
   }
 }
