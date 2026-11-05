@@ -24,7 +24,7 @@
     "README.md"
   ],
   "engines": {
-    "node": "26.13.0"
+    "node": ">=22"
   },
   "volta": {
     "node": "24.22.2"

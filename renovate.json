@@ -14,6 +14,15 @@
       "matchManagers": [
         "npm"
       ],
+      "matchDepTypes": [
+        "engines"
+      ],
+      "enabled": false
+    },
+    {
+      "matchManagers": [
+        "npm"
+      ],
       "matchUpdateTypes": [
         "!major"
       ],
