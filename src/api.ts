@@ -16,6 +16,7 @@ const routes: [
   string[]
 ][] = [
   ['GET', /^\/rest\/api\/3\/myself$/, []],
+  ['GET', /^\/rest\/api\/3\/field$/, []],
   ['GET', new RegExp(`^/rest/api/3/issue/${key}$`), ['fields']],
   ['GET', new RegExp(`^/rest/api/3/issue/${key}/comment$`), ['orderBy', 'maxResults', 'startAt']],
   ['GET', new RegExp(`^/rest/api/3/issue/${key}/transitions$`), ['expand']],

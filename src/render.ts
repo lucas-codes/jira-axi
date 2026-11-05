@@ -1,7 +1,7 @@
 /** Compact renderers for the normalized issue model. */
 
 import { truncate } from './adf.ts';
-import { Out, csvCell } from './format.ts';
+import { Out, csvCell, type Scalar } from './format.ts';
 import type { Issue, Sprint } from './model.ts';
 
 export const DEFAULT_DESCRIPTION_CHARS = 2000;
@@ -30,6 +30,7 @@ export function renderIssue(issue: Issue, opts: RenderIssueOptions): string {
       : issue.status,
   );
   out.kv('priority', issue.priority);
+  if (issue.flagged !== undefined) out.kv('flagged', issue.flagged);
   out.kv('assignee', issue.assignee);
   if (opts.full) out.kv('reporter', issue.reporter);
   if (issue.resolution) out.kv('resolution', issue.resolution);
@@ -107,6 +108,7 @@ export interface RenderListOptions {
   full: boolean;
   query: string;
   hints?: string[];
+  flagged?: boolean;
 }
 
 export function renderIssueList(issues: Issue[], opts: RenderListOptions): string {
@@ -115,11 +117,15 @@ export function renderIssueList(issues: Issue[], opts: RenderListOptions): strin
   const columns = opts.full
     ? ['key', 'type', 'status', 'priority', 'assignee', 'updated', 'labels', 'summary']
     : ['key', 'type', 'status', 'assignee', 'summary'];
-  const rows = issues.map((i) =>
+  const rows: Scalar[][] = issues.map((i) =>
     opts.full
       ? [i.key, i.type, i.status, i.priority ?? '-', i.assignee ?? '-', i.updated ?? '-', i.labels.join('|') || '-', i.summary]
       : [i.key, i.type, i.status, i.assignee ?? '-', clip(i.summary, false)],
   );
+  if (opts.flagged) {
+    columns.push('flagged');
+    rows.forEach((row, index) => row.push(issues[index]!.flagged));
+  }
   out.table('issues', columns, rows);
   const hints = opts.hints ? [...opts.hints] : [];
   if (issues.length === 0) {

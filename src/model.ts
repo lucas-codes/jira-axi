@@ -57,6 +57,7 @@ export interface Issue {
   status: string;
   statusCategory?: string;
   priority?: string;
+  flagged?: boolean;
   resolution?: string;
   assignee?: string;
   reporter?: string;
@@ -224,12 +225,21 @@ function parseSubtasks(v: unknown): Subtask[] {
   return out;
 }
 
+export function parseFlagged(value: unknown): boolean {
+  if (value == null)
+    return false;
+  if (!Array.isArray(value))
+    throw new JiraError('Malformed Flagged value', 'bad_response');
+  return value.length > 0;
+}
+
 export interface ParseOptions {
   /** Jira site base URL, used to build browse links. */
   baseUrl?: string;
   /** Epic-link custom field id from ~/.config/.jira/.config.yml, when known. */
   epicLinkField?: string;
   sprintField?: string;
+  flaggedField?: string;
   rest?: boolean;
 }
 
@@ -251,6 +261,7 @@ export function parseIssue(input: unknown, opts: ParseOptions = {}): Issue {
     status: named(status) ?? '?',
     statusCategory: named(rec(status?.['statusCategory'])),
     priority: named(f['priority']),
+    ...(opts.flaggedField ? { flagged: parseFlagged(f[opts.flaggedField]) } : {}),
     resolution: named(f['resolution']),
     assignee: named(f['assignee']),
     reporter: named(f['reporter']),

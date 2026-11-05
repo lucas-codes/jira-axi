@@ -129,6 +129,9 @@ jira-axi transitions DEMO-101       # id, name and target status of each availab
 jira-axi attachments DEMO-101       # id, filename, size, created, author and optional authorAccountId, newest first
 ```
 
+`issue` and `list` show Flagged as a boolean when the site has a field named
+`Flagged`. The field id is resolved by name for each command.
+
 A bare issue key works too: `jira-axi DEMO-101`.
 
 ### Output shape
@@ -184,10 +187,19 @@ cat note.md | jira-axi comment DEMO-101 --yes
 
 jira-axi create --type Task --summary "Title" --file body.md --yes
 jira-axi edit DEMO-101 --priority High --assignee "Some One" --yes
+jira-axi edit DEMO-101 --flag
+jira-axi edit DEMO-101 --unflag --yes
 
 jira-axi transition DEMO-101 --to "In Progress"       # prints the payload, sends nothing
 jira-axi transition DEMO-101 --to "In Progress" --yes
 ```
+
+`edit --flag` sets Flagged and `--unflag` clears it. They cannot be combined.
+The preview shows the old and new booleans. Flagged changes share one atomic
+PUT with other edit fields and use the same `payloadDigest` confirmation.
+After applying, the command reads back and prints the Flagged boolean. A
+read-back failure reports `applied: true`; read the issue before retrying.
+Sites without a Flagged field return `unsupported` for these edits.
 
 `transition` moves an issue through its workflow. `--to` is matched
 case-insensitively against each available transition's name and its target

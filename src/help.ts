@@ -18,6 +18,7 @@ export function helpText(): string {
   out.raw(
     '  Reads are free-running. Every write (comment, create, edit, transition, attach, detach, link, unlink) prints its exact payload and does nothing without --yes. Comment and description bodies are read from --file or stdin, never inline, to avoid shell quoting damage.',
   );
+  out.raw('  Flagged is a boolean resolved by the site field name. issue and list show it; edit --flag sets it and --unflag clears it.');
   out.raw('rest:');
   out.raw('  Uses Jira Cloud REST at the site named by ATLASSIAN_SITE. --project/-p overrides JIRA_PROJECT; sprint commands and board output need JIRA_BOARD.');
   out.raw('  REST previews print payloadDigest and the resolved request; optional --confirm <digest> requires --yes and a matching digest. Unsupported Markdown is disclosed before applying ADF bodies. Never blindly retry a POST with applied: unknown; read back first.');
@@ -31,7 +32,7 @@ export function helpText(): string {
     '--project/-p <KEY>', '--jql/-q <jql>', '--assignee/-a <me|name>', '--mine', '--status/-s <s>',
     '--summary/-s <text>', '--type/-t <t>', '--priority/-y <p>', '--label/-l <l>', '--parent/-P <KEY>',
     '--component/-C <name>', '--file/-F <path|->', '--body-file <path|->', '--stdin', '--internal',
-    '--skip-notify', '--to <name>', '--sprint <current|prev|next|ID>', '--state <states>', '--updated <date>',
+    '--flag', '--unflag', '--skip-notify', '--to <name>', '--sprint <current|prev|next|ID>', '--state <states>', '--updated <date>',
     '--created <date>', '--watching', '--history', '--name <filename>', '--out <path|->', '--force', '--yes', '--confirm <digest>', '--help', '-v/--version',
   ];
   out.raw(`flags[${flags.length}]:`);
@@ -51,6 +52,7 @@ export function helpText(): string {
     'jira-axi comment DEMO-101 --file note.md --yes',
     'jira-axi create --type Task --summary "Title" --file body.md --yes',
     'jira-axi edit DEMO-101 --priority High --yes',
+    'jira-axi edit DEMO-101 --unflag',
     'jira-axi transition DEMO-101 --to "In Progress" --yes',
     'jira-axi attachments DEMO-101',
     'jira-axi attach DEMO-101 --file plan.md --name DEMO-101-scope-plan.md --yes',

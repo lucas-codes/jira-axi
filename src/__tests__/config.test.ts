@@ -11,7 +11,7 @@ async function exec(argv: string[], env: Record<string, string | undefined>, res
     env,
     fetch: async (url) => {
       calls.push(String(url));
-      return Response.json(responses.shift() ?? {});
+      return Response.json(new URL(String(url)).pathname === '/rest/api/3/field' ? [] : responses.shift() ?? {});
     },
     write: (s) => { output += s; },
     stdin: { isTTY: true, read: () => '' },
@@ -85,12 +85,12 @@ test('status reports the resolved server and stays exit zero when the site is mi
 
 test('JIRA_PROJECT is the default project and --project overrides it', async () => {
   const fallback = await exec(['list', '--json'], baseEnv, [{ issues: [], isLast: true }]);
-  assert.match(new URL(fallback.calls[0]!).searchParams.get('jql')!, /^project="DEMO" /);
+  assert.match(new URL(fallback.calls[1]!).searchParams.get('jql')!, /^project="DEMO" /);
   const lower = await exec(['list', '--json'], { ...baseEnv, JIRA_PROJECT: 'demo' }, [{ issues: [], isLast: true }]);
-  assert.match(new URL(lower.calls[0]!).searchParams.get('jql')!, /^project="DEMO" /);
+  assert.match(new URL(lower.calls[1]!).searchParams.get('jql')!, /^project="DEMO" /);
   for (const flag of ['--project', '-p']) {
     const r = await exec(['list', flag, 'other', '--json'], baseEnv, [{ issues: [], isLast: true }]);
-    assert.match(new URL(r.calls[0]!).searchParams.get('jql')!, /^project="OTHER" /);
+    assert.match(new URL(r.calls[1]!).searchParams.get('jql')!, /^project="OTHER" /);
   }
 });
 
