@@ -6,6 +6,7 @@ import { buildJql } from '../jql.ts';
 import { parseArgs } from '../args.ts';
 import { adfToText } from '../adf.ts';
 const fixture=(n:string)=>JSON.parse(readFileSync(new URL(`fixtures/${n}.json`,import.meta.url),'utf8'));
+const flaggedMeta=(id='customfield_99999',custom='com.atlassian.jira.plugin.system.customfieldtypes:multicheckboxes')=>({id,name:'Flagged',schema:{type:'array',items:'option',custom}});
 test('issue uses bounded comment page, newest reversed, goldens unchanged',async()=>{
  const issue=fixture('issue-view-comments');const page=issue.fields.comment;delete issue.fields.comment;
  for(const flags of [[],['--comments'],['--full'],['--comments','101']]){const r=await run(['issue','demo-101',...flags,'--json'],[issue,{...page,comments:[...page.comments].reverse()}]);assert.equal(r.exit,0,r.output);assert.equal(r.calls.length,3);const url=new URL(r.calls[2]!.url);assert.equal(url.searchParams.get('orderBy'),'-created');assert.equal(url.searchParams.get('maxResults'),flags.includes('--full')||flags.includes('101')?'100':flags.length?'10':'1');assert.deepEqual(r.value.comments.map((c:{id:string})=>c.id),page.comments.map((c:{id:string})=>c.id));}
@@ -54,7 +55,7 @@ test('ADF roots, node attributes, depth/count and safe external links',()=>{
 
 test('issue exposes Flagged as a boolean in text and JSON and omits it on unsupported sites',async()=>{
  for(const value of [[{value:'Impediment'}],null,[]])for(const json of [false,true]){
-  const r=await run(['issue','DEMO-1',...(json?['--json']:[])],[{key:'DEMO-1',fields:{customfield_99999:value}},{comments:[],total:0}],200,{},[{id:'customfield_99999',name:'Flagged'}]);
+  const r=await run(['issue','DEMO-1',...(json?['--json']:[])],[{key:'DEMO-1',fields:{customfield_99999:value}},{comments:[],total:0}],200,{},[flaggedMeta()]);
   assert.equal(r.exit,0,r.output);const expected=Array.isArray(value)&&value.length>0;
   if(json)assert.equal(r.value.flagged,expected);else assert.match(r.output,new RegExp(`flagged: ${expected}`));
   assert.ok(new URL(r.calls[1]!.url).searchParams.get('fields')!.includes('customfield_99999'));
@@ -65,13 +66,23 @@ test('issue exposes Flagged as a boolean in text and JSON and omits it on unsupp
 });
 test('list includes the flagged column in compact and full output and the JSON boolean',async()=>{
  for(const flags of [[],['--full'],['--json']]){
-  const r=await run(['list',...flags],[{issues:[{key:'DEMO-1',fields:{customfield_99999:[{value:'Impediment'}]}}],isLast:true}],200,{},[{id:'customfield_99999',name:'Flagged'}]);
+  const r=await run(['list',...flags],[{issues:[{key:'DEMO-1',fields:{customfield_99999:[{value:'Impediment'}]}}],isLast:true}],200,{},[flaggedMeta()]);
   assert.equal(r.exit,0,r.output);if(flags.includes('--json'))assert.equal(r.value.issues[0].flagged,true);else {assert.match(r.output,/issues\[1\]\{[^}]*flagged/);assert.match(r.output,/,true/);}
  }
 });
 test('malformed or ambiguous Flagged metadata and malformed issue values fail closed',async()=>{
- for(const fields of [{},[null],[{name:'Flagged'}],[{id:'a',name:'Flagged'},{id:'b',name:'Flagged'}]]){
+ for(const fields of [{},[null],[{...flaggedMeta(),id:undefined}],[flaggedMeta('a'),flaggedMeta('b')]]){
   const r=await run(['issue','DEMO-1','--json'],[],200,{},fields);assert.equal(r.exit,1);assert.equal(r.value.code,Array.isArray(fields)&&fields.length===2?'ambiguous_field':'bad_response');
  }
- const r=await run(['issue','DEMO-1','--json'],[{key:'DEMO-1',fields:{customfield_99999:'bad'}},{comments:[],total:0}],200,{},[{id:'customfield_99999',name:'Flagged'}]);assert.equal(r.value.code,'bad_response');
+ const r=await run(['issue','DEMO-1','--json'],[{key:'DEMO-1',fields:{customfield_99999:'bad'}},{comments:[],total:0}],200,{},[flaggedMeta()]);assert.equal(r.value.code,'bad_response');
+});
+test('a text field also named Flagged neither breaks reads nor shadows the real flag',async()=>{
+ const text=flaggedMeta('customfield_1','com.atlassian.jira.plugin.system.customfieldtypes:textfield');
+ const both=await run(['issue','DEMO-1','--json'],[{key:'DEMO-1',fields:{customfield_1:'note',customfield_99999:[{value:'Impediment'}]}},{comments:[],total:0}],200,{},[text,flaggedMeta()]);
+ assert.equal(both.exit,0,both.output);assert.equal(both.value.flagged,true);const requested=new URL(both.calls[1]!.url).searchParams.get('fields')!.split(',');assert.ok(requested.includes('customfield_99999'));assert.ok(!requested.includes('customfield_1'));
+ const only=await run(['issue','DEMO-1','--json'],[{key:'DEMO-1',fields:{customfield_1:'note'}},{comments:[],total:0}],200,{},[text]);
+ assert.equal(only.exit,0,only.output);assert.equal(only.value.flagged,undefined);
+});
+test('Flagged option members that are not options fail closed instead of reading as flagged',async()=>{
+ for(const value of [[null],[{}],['Impediment']]){const r=await run(['issue','DEMO-1','--json'],[{key:'DEMO-1',fields:{customfield_99999:value}},{comments:[],total:0}],200,{},[flaggedMeta()]);assert.equal(r.exit,1,r.output);assert.equal(r.value.code,'bad_response');}
 });

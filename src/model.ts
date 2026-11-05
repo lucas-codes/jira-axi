@@ -228,7 +228,7 @@ function parseSubtasks(v: unknown): Subtask[] {
 export function parseFlagged(value: unknown): boolean {
   if (value == null)
     return false;
-  if (!Array.isArray(value))
+  if (!Array.isArray(value) || value.some(option => typeof rec(option)?.['value'] !== 'string'))
     throw new JiraError('Malformed Flagged value', 'bad_response');
   return value.length > 0;
 }
